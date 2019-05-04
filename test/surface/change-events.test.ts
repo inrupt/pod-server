@@ -2,12 +2,14 @@ import { startServer, stopServer } from './helper'
 import fetch from 'node-fetch'
 import WebSocket from 'ws'
 
+const PORT = 8081
+
 let wsClient: WebSocket
 let received: Promise<string>
 
 beforeEach(async () => {
-  startServer(8080)
-  wsClient = new WebSocket('ws://localhost:8080')
+  await startServer(PORT)
+  wsClient = new WebSocket(`ws://localhost:${PORT}`)
   received = new Promise((resolve) => {
     wsClient.on('message', function incoming (data) {
       resolve(data.toString())
@@ -26,7 +28,7 @@ afterEach(() => {
 })
 
 test('publishes a change event', async () => {
-  await fetch('http://localhost:8080/asdf/test.txt', {
+  await fetch(`http://localhost:${PORT}/asdf/test.txt`, {
     method: 'PUT',
     body:  'hello'
   })
