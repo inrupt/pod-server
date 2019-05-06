@@ -26,7 +26,7 @@
     "typescript": "^3.4.2"
   },
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node dist/standalone.js",
     "dev": "DEBUG=* ts-node-dev --project \"tsconfig.json\" src/server.ts",
     "build": "tsc -p tsconfig.json",
     "jest": "jest",

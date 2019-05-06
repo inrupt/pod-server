@@ -1,4 +1,5 @@
 import * as http from 'http'
+import * as fs from 'fs'
 import Debug from 'debug'
 import { BlobTreeInMem, BlobTree, makeHandler, Path } from 'wac-ldp'
 import * as WebSocket from 'ws'
@@ -9,6 +10,7 @@ import { defaultConfiguration } from 'solid-idp'
 const debug = Debug('server')
 
 const IDP_PREFIX = '/account/'
+const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 
 export class Server {
   storage: BlobTree
@@ -37,9 +39,16 @@ export class Server {
     this.app.use(this.idpRouter.allowedMethods())
     this.server = this.app.listen(this.port)
     this.app.use(async (ctx, next) => {
-      debug('LDP handler', ctx.req.method, ctx.req.url)
-      this.handler(ctx.req, ctx.res)
-      ctx.respond = false
+      debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
+      if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
+        ctx.res.writeHead(200, {})
+        ctx.res.end(DATA_BROWSER_HTML)
+        ctx.respond = false
+      } else {
+        debug('LDP handler', ctx.req.method, ctx.req.url)
+        this.handler(ctx.req, ctx.res)
+        ctx.respond = false
+      }
     })
     this.wsServer = new WebSocket.Server({
       server: this.server
