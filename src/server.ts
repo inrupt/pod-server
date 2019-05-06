@@ -28,7 +28,7 @@ export class Server {
   }
   async listen () {
     this.idpRouter = await defaultConfiguration({
-      issuer: aud,
+      issuer: this.aud,
       pathPrefix: IDP_PREFIX
     })
     this.app = new Koa()
@@ -67,20 +67,4 @@ export class Server {
     }
     debug('closing port', this.port)
   }
-}
-
-// on startup:
-const port = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 8080
-
-const aud = process.env.AUD || 'https://localhost:8443'
-const server = new Server(port, aud)
-
-// tslint:disable-next-line: no-floating-promises
-server.listen()
-
-// server.close()
-
-export function closeServer () {
-  debug('closing server')
-  server.close()
 }
