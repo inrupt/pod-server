@@ -7,9 +7,9 @@
 [![Greenkeeper badge](https://badges.greenkeeper.io/inrupt/pod-server.svg)](https://greenkeeper.io/)
 
 Solid server package that bind together
-[solid-idp](solid-idp),
-[wac-ldp](wac-ldp),
-[websockets-pubsub](websockets-pubsub), and the
+[solid-idp](https://github.com/inrupt/solid-idp),
+[wac-ldp](https://github.com/inrupt/wac-ldp),
+[websockets-pubsub](https://github.com/inrupt/websockets-pubsub), and the
 [data-browser](https://github.com/linkeddata/mashlib).
 
 Published under an MIT license by inrupt, Inc.
