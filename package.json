@@ -10,7 +10,7 @@
     "debug": "^4.1.1",
     "koa": "^2.7.0",
     "solid-idp": "^0.1.0",
-    "wac-ldp": "^0.1.2",
+    "wac-ldp": "^0.2.0",
     "websockets-pubsub": "^0.1.0",
     "ws": "^6.2.1"
   },
