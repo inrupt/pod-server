@@ -6,17 +6,19 @@
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/inrupt/pod-server.svg)](https://greenkeeper.io/)
 
-A WebSockets pubsub component for Solid servers, sends change notifications to subscribed WebSocket clients.
-
-See https://github.com/solid/solid-spec/blob/master/api-websockets.md for the relevant section of the Solid spec.
+Solid server package that bind together
+[solid-idp](solid-idp),
+[wac-ldp](wac-ldp),
+[websockets-pubsub](websockets-pubsub), and the
+[data-browser](https://github.com/linkeddata/mashlib).
 
 Published under an MIT license by inrupt, Inc.
 
 Contributors:
 * Michiel de Jong
+* Jackson Morgan
 * Ruben Verborgh
 * Kjetil Kjernsmo
-* Jackson Morgan
 * Pat McBennett
 * Justin Bingham
 * Sebastien Dubois
