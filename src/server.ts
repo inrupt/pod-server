@@ -9,7 +9,6 @@ import { defaultConfiguration } from 'solid-idp'
 
 const debug = Debug('server')
 
-const IDP_PREFIX = '/account/'
 const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 
 export class Server {
@@ -22,16 +21,15 @@ export class Server {
   idpRouter: any
   aud: string
   handler: any
-  constructor (port: number, aud: string) {
+  constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
     this.aud = aud
     this.storage = new BlobTreeInMem() // singleton in-memory storage
-    this.handler = makeHandler(this.storage, aud)
+    this.handler = makeHandler(this.storage, aud, skipWac)
   }
   async listen () {
     this.idpRouter = await defaultConfiguration({
-      issuer: this.aud,
-      pathPrefix: IDP_PREFIX
+      issuer: this.aud
     })
     this.app = new Koa()
     debug(this.idpRouter)
