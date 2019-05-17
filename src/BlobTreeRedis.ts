@@ -4,49 +4,61 @@ import { Blob } from 'wac-ldp/src/lib/storage/Blob'
 import { Container, Member } from 'wac-ldp/src/lib/storage/Container'
 import { EventEmitter } from 'events'
 import { promisify } from 'util'
-
-const callbacksClient = redis.createClient()
-const client = {
-  get: promisify(callbacksClient.get).bind(callbacksClient),
-  set: promisify(callbacksClient.set).bind(callbacksClient),
-  del: promisify(callbacksClient.DEL).bind(callbacksClient),
-  exists: promisify(callbacksClient.get).bind(callbacksClient),
-  hkeys: promisify(callbacksClient.HKEYS).bind(callbacksClient)
-}
+import { streamToBuffer, bufferToStream } from './streams'
 
 class BlobRedis implements Blob {
-  path: string
-  constructor (pathStr: string) {
-    this.path = pathStr
+  path: Path
+  client: any
+  watched: boolean
+  constructor (path: Path, client: any) {
+    this.path = path
+    this.client = client
+    this.watched = false
+  }
+  async checkWatch () {
+    if (this.watched) {
+      return
+    }
+    await this.client.watch(this.path.toString())
+    this.watched = true
   }
   async exists () {
-    const ret = await client.exists(this.path)
+    await this.checkWatch()
+    const ret = await this.client.exists(this.path.toString())
     return (ret === '1')
   }
   async getData () {
-    const ret = await client.get(this.path)
+    await this.checkWatch()
+    const ret = await this.client.get(this.path.toString())
     return bufferToStream(Buffer.from(ret))
   }
-  async setData (value: any) {
-    return void client.set(this.path, value)
+  async setData (stream: ReadableStream) {
+    await this.checkWatch()
+    const value: Buffer = await streamToBuffer(stream)
+    await this.client.set(this.path.toString(), value.toString())
+    const parentPath = this.path.toParent().toString()
+    await this.client.hset(parentPath, this.path.toString(), 'yes')
   }
-  delete () {
-    return void client.del(this.path)
+  async delete () {
+    await this.checkWatch()
+    return void this.client.del(this.path.toString())
   }
 }
 
 class ContainerRedis implements Container {
-  path: string
-  constructor (pathStr: string) {
-    this.path = pathStr
+  path: Path
+  client: any
+  constructor (path: Path, client: any) {
+    this.path = path
+    this.client = client
   }
   async exists () {
-    const ret = await client.exists(this.path)
+    const ret = await this.client.exists(this.path.toString())
     return (ret === '1')
   }
   async getMembers () {
-    const members = await client.hkeys(this.path)
-    return members.map(a => {
+    const members = await this.client.hkeys(this.path.toString())
+    return members.map((a: any) => {
       return {
         name: a,
         isContainer: false
@@ -54,17 +66,36 @@ class ContainerRedis implements Container {
     })
   }
   delete () {
-    return client.del(this.path)
+    return this.client.del(this.path.toString())
   }
 }
 
 export class BlobTreeRedis extends EventEmitter implements BlobTree {
+  callbacksClient: any
+  client: any
+  constructor () {
+    super()
+    this.callbacksClient = redis.createClient()
+    this.client = {
+      get: promisify(this.callbacksClient.get).bind(this.callbacksClient),
+      set: promisify(this.callbacksClient.set).bind(this.callbacksClient),
+      del: promisify(this.callbacksClient.DEL).bind(this.callbacksClient) as unknown as (path: string) => Promise<void>,
+      exists: promisify(this.callbacksClient.get).bind(this.callbacksClient),
+      hkeys: promisify(this.callbacksClient.hkeys).bind(this.callbacksClient),
+      hset: promisify(this.callbacksClient.hset).bind(this.callbacksClient),
+      quit: promisify(this.callbacksClient.quit).bind(this.callbacksClient),
+      watch: promisify(this.callbacksClient.watch).bind(this.callbacksClient)
+    }
+  }
+  stop () {
+    return this.client.quit()
+  }
   getBlob (path: Path): Blob {
-    const ret: Blob = new BlobRedis(path.toString())
+    const ret: Blob = new BlobRedis(path, this.client)
     return ret
   }
   getContainer (path: Path): Container {
-    const ret: Container = new ContainerRedis(path.toString())
+    const ret: Container = new ContainerRedis(path, this.client)
     return ret
   }
 }
