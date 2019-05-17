@@ -25,7 +25,7 @@ class BlobRedis implements Blob {
   async exists () {
     await this.checkWatch()
     const ret = await this.client.exists(this.path.toString())
-    return (ret === '1')
+    return (ret === 1)
   }
   async getData () {
     await this.checkWatch()
@@ -33,11 +33,25 @@ class BlobRedis implements Blob {
     return bufferToStream(Buffer.from(ret))
   }
   async setData (stream: ReadableStream) {
+    await this.checkWatch() // to support optimistic locking for setData-then-delete
     const value: Buffer = await streamToBuffer(stream)
-    await this.client.multi()
-    await this.client.set(this.path.toString(), value.toString())
-    const parentPath = this.path.toParent().toString()
-    await this.client.hset(parentPath, this.path.toString(), 'yes')
+
+    // this.client.set(this.path.toString(), value.toString())
+
+    const multi = this.client.multi()
+    // method calls on the multi object are synchronous
+    // except for multi.exec, which is asynchronous again.
+    multi.set(this.path.toString(), value.toString())
+    // mkdir -p:
+    let childPath = this.path
+    let parentPath
+    let isContainer = 'false'
+    do {
+      parentPath = childPath.toParent()
+      multi.hset(parentPath.toString(), childPath.toString(), isContainer)
+      isContainer = 'true'
+      childPath = parentPath
+    } while (!parentPath.isRoot())
     // This watch..multi..exec transaction guarantees two things:
     // 1) the blob wasn't deleted by a different thread inbetween our
     // `set` call for the blob and our `hset` call for the container.
@@ -46,11 +60,20 @@ class BlobRedis implements Blob {
     // `setData` here.
     // See https://redis.io/topics/transactions for more details,
     // specifically the 'Optimistic locking using check-and-set' section.
-    await this.client.exec()
+    await multi.exec()
   }
   async delete () {
-    await this.checkWatch()
-    return void this.client.del(this.path.toString())
+    await this.checkWatch() // to support optimistic locking for delete-then-setData
+    const multi = this.client.multi()
+    // method calls on the multi object are synchronous
+    // except for multi.exec, which is asynchronous again.
+    multi.del(this.path.toString())
+    const parentPath = this.path.toParent().toString()
+    multi.hdel(parentPath, this.path.toString())
+    // See https://redis.io/topics/transactions for more details,
+    // specifically the 'Optimistic locking using check-and-set' section.
+    await multi.exec()
+
   }
 }
 
@@ -63,40 +86,50 @@ class ContainerRedis implements Container {
   }
   async exists () {
     const ret = await this.client.exists(this.path.toString())
-    return (ret === '1')
+    return (ret === 1)
   }
   async getMembers () {
-    const members = await this.client.hkeys(this.path.toString())
-    return members.map((a: any) => {
-      return {
-        name: a,
-        isContainer: false
-      } as Member
-    })
+    const membersObj = await this.client.hgetall(this.path.toString())
+    const members = []
+    for (let k in membersObj) {
+      members.push({ name: k, isContainer: (membersObj[k] === 'true') } as Member)
+    }
+    return members
   }
   delete () {
     return this.client.del(this.path.toString())
   }
 }
 
+function promisifyRedisClient (callbacksClient: any) {
+  return {
+    select: callbacksClient.select.bind(callbacksClient),
+    flushdb: callbacksClient.flushdb.bind(callbacksClient),
+    get: promisify(callbacksClient.get).bind(callbacksClient),
+    set: promisify(callbacksClient.set).bind(callbacksClient),
+    del: promisify(callbacksClient.DEL).bind(callbacksClient) as unknown as (path: string) => Promise<void>,
+    exists: promisify(callbacksClient.exists).bind(callbacksClient),
+    hgetall: promisify(callbacksClient.hgetall).bind(callbacksClient),
+    hset: promisify(callbacksClient.hset).bind(callbacksClient),
+    quit: promisify(callbacksClient.quit).bind(callbacksClient),
+    watch: promisify(callbacksClient.watch).bind(callbacksClient),
+    multi: callbacksClient.multi.bind(callbacksClient),
+    exec: promisify(callbacksClient.exec).bind(callbacksClient)
+  }
+}
 export class BlobTreeRedis extends EventEmitter implements BlobTree {
   callbacksClient: any
   client: any
   constructor () {
     super()
     this.callbacksClient = redis.createClient()
-    this.client = {
-      get: promisify(this.callbacksClient.get).bind(this.callbacksClient),
-      set: promisify(this.callbacksClient.set).bind(this.callbacksClient),
-      del: promisify(this.callbacksClient.DEL).bind(this.callbacksClient) as unknown as (path: string) => Promise<void>,
-      exists: promisify(this.callbacksClient.get).bind(this.callbacksClient),
-      hkeys: promisify(this.callbacksClient.hkeys).bind(this.callbacksClient),
-      hset: promisify(this.callbacksClient.hset).bind(this.callbacksClient),
-      quit: promisify(this.callbacksClient.quit).bind(this.callbacksClient),
-      watch: promisify(this.callbacksClient.watch).bind(this.callbacksClient),
-      multi: promisify(this.callbacksClient.multi).bind(this.callbacksClient),
-      exec: promisify(this.callbacksClient.exec).bind(this.callbacksClient)
-    }
+    this.client = promisifyRedisClient(this.callbacksClient)
+  }
+  select (dbIndex: number) {
+    return this.client.select(dbIndex)
+  }
+  flushdb () {
+    return this.client.flushdb()
   }
   stop () {
     return this.client.quit()
