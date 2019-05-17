@@ -2,7 +2,8 @@ import * as http from 'http'
 import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
-import { BlobTreeInMem, BlobTree, makeHandler, Path, setRootAcl } from 'wac-ldp'
+import { BlobTreeRedis } from './BlobTreeRedis'
+import { BlobTree, makeHandler, Path, setRootAcl } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -42,7 +43,7 @@ export class Server {
     this.aud = options.aud
     this.httpsConfig = options.httpsConfig
     this.owner = options.owner
-    this.storage = new BlobTreeInMem() // singleton in-memory storage
+    this.storage = new BlobTreeRedis() // singleton in-memory storage
     this.handler = makeHandler(this.storage, options.aud, options.skipWac)
   }
   provision () {
