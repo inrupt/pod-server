@@ -2,7 +2,7 @@ import * as http from 'http'
 import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
-import { BlobTreeInMem, BlobTree, makeHandler, Path } from 'wac-ldp'
+import { BlobTreeInMem, BlobTree, makeHandler, Path, setRootAcl } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -21,7 +21,8 @@ type OptionsObject = {
   port: number,
   aud: string,
   skipWac: boolean,
-  httpsConfig: HttpsConfig | undefined
+  httpsConfig: HttpsConfig | undefined,
+  owner: string
 }
 
 export class Server {
@@ -35,12 +36,17 @@ export class Server {
   aud: string
   handler: any
   httpsConfig: HttpsConfig | undefined
+  owner: string
   constructor (options: OptionsObject) {
     this.port = options.port
     this.aud = options.aud
     this.httpsConfig = options.httpsConfig
+    this.owner = options.owner
     this.storage = new BlobTreeInMem() // singleton in-memory storage
     this.handler = makeHandler(this.storage, options.aud, options.skipWac)
+  }
+  provision () {
+    return setRootAcl(this.storage, this.owner)
   }
   async listen () {
     //  this.idpRouter = await defaultConfiguration({

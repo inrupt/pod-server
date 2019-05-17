@@ -17,9 +17,16 @@ if (tlsDir) {
   }
 }
 
-const server = new Server({ port, aud, skipWac, httpsConfig })
+const owner = process.env.OWNER || 'https://michielbdejong.inrupt.net/profile/card#me'
+
+const server = new Server({ port, aud, skipWac, httpsConfig, owner })
+
+async function startServer () {
+  await server.provision()
+  await server.listen()
+}
 
 // tslint:disable-next-line: no-floating-promises
-server.listen()
+startServer()
 
 // server.close()
