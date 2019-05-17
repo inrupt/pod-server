@@ -1,4 +1,5 @@
 import * as http from 'http'
+import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
 import { BlobTreeInMem, BlobTree, makeHandler, Path } from 'wac-ldp'
@@ -11,6 +12,18 @@ const debug = Debug('server')
 
 const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 
+type HttpsConfig = {
+  key: Buffer,
+  cert: Buffer
+}
+
+type OptionsObject = {
+  port: number,
+  aud: string,
+  skipWac: boolean,
+  httpsConfig: HttpsConfig | undefined
+}
+
 export class Server {
   storage: BlobTree
   server: http.Server | undefined
@@ -21,11 +34,13 @@ export class Server {
   idpRouter: any
   aud: string
   handler: any
-  constructor (port: number, aud: string, skipWac: boolean) {
-    this.port = port
-    this.aud = aud
+  httpsConfig: HttpsConfig | undefined
+  constructor (options: OptionsObject) {
+    this.port = options.port
+    this.aud = options.aud
+    this.httpsConfig = options.httpsConfig
     this.storage = new BlobTreeInMem() // singleton in-memory storage
-    this.handler = makeHandler(this.storage, aud, skipWac)
+    this.handler = makeHandler(this.storage, options.aud, options.skipWac)
   }
   async listen () {
     //  this.idpRouter = await defaultConfiguration({
@@ -49,7 +64,12 @@ export class Server {
         ctx.respond = false
       }
     })
-    this.server = this.app.listen(this.port)
+    if (this.httpsConfig) {
+      this.server = https.createServer(this.httpsConfig, this.app.callback())
+    } else {
+      this.server = http.createServer(this.app.callback())
+    }
+    this.server.listen(this.port)
     this.wsServer = new WebSocket.Server({
       server: this.server
     })
@@ -65,7 +85,7 @@ export class Server {
         this.hub.publishChange(event.path, this.storage)
       }
     })
-    debug('listening on port', this.port)
+    debug('listening on port', this.port, (this.httpsConfig ? 'https' : 'http'))
   }
   close () {
     if (this.server) {
