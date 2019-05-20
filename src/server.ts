@@ -11,7 +11,10 @@ import { defaultConfiguration } from 'solid-idp'
 
 const debug = Debug('server')
 
+const OPENID_CONFIG_URL_PATH = '/.well-known/openid-configuration'
+const OPENID_CONFIG_JSON = fs.readFileSync('./static/openid-configuration.json')
 const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
+const MASHLIB_JS = fs.readFileSync('./static/index.html')
 
 type HttpsConfig = {
   key: Buffer,
@@ -61,7 +64,11 @@ export class Server {
     this.app.use(async (ctx, next) => {
       debug('yes!')
       debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
-      if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
+      if (ctx.req.url === OPENID_CONFIG_URL_PATH) {
+        ctx.res.writeHead(200, {})
+        ctx.res.end(OPENID_CONFIG_JSON)
+        ctx.respond = false
+      } else if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
         ctx.res.writeHead(200, {})
         ctx.res.end(DATA_BROWSER_HTML)
         ctx.respond = false
