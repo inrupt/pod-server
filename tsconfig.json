@@ -1,6 +1,8 @@
 {
   "env": "node",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "*": ["types/*"] },
     "target": "es2015",
     "strict": true,
     "module": "commonjs",
