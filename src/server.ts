@@ -30,7 +30,7 @@ export class Server {
   async listen () {
      this.idpRouter = await defaultConfiguration({
        issuer: this.aud,
-       pathPrefix: 'account'
+       pathPrefix: '/account/'
      })
 
     this.app = new Koa()
