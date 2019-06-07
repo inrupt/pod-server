@@ -28,14 +28,15 @@ export class Server {
     this.handler = makeHandler(this.storage, aud, skipWac)
   }
   async listen () {
-    //  this.idpRouter = await defaultConfiguration({
-    //    issuer: this.aud
-    //  })
+     this.idpRouter = await defaultConfiguration({
+       issuer: this.aud,
+       pathPrefix: 'account'
+     })
 
     this.app = new Koa()
-    // debug(this.idpRouter)
-    // this.app.use(this.idpRouter.routes())
-    // this.app.use(this.idpRouter.allowedMethods())
+    debug(this.idpRouter)
+    this.app.use(this.idpRouter.routes())
+    this.app.use(this.idpRouter.allowedMethods())
     this.app.use(async (ctx, next) => {
       debug('yes!')
       debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
