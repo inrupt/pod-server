@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "node dist/standalone.js",
-    "dev": "DEBUG=* ts-node-dev --project \"tsconfig.json\" src/server.ts",
+    "dev": "ts-node-dev --project \"tsconfig.json\" src/standalone.ts",
     "build": "tsc -p tsconfig.json",
     "jest": "jest",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
