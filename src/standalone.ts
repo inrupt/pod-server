@@ -17,7 +17,10 @@ if (tlsDir) {
   }
 }
 
-const owner = process.env.OWNER || 'https://michielbdejong.inrupt.net/profile/card#me'
+const owner = process.env.OWNER
+if (!owner) {
+  throw new Error('OWNER environment variable required')
+}
 
 const server = new Server({ port, aud, skipWac, httpsConfig, owner })
 
