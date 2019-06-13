@@ -1,34 +1,59 @@
-<!DOCTYPE html>
-<html id="docHTML">
-<head>
-    <link type="text/css" rel="stylesheet" href="https://solid.github.io/solid-panes/style/tabbedtab.css" />
-    <script type="text/javascript" src="https://inrupt.net/common/js/mashlib.min.js"></script>
-    <script>
-      const $SOLID_GLOBAL_config = {}
-      document.addEventListener('DOMContentLoaded', function () {
-        const panes = require('mashlib')
-        const UI = panes.UI
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Solid App</title>
+  </head>
+  <body>
+    <div id="loginBanner"></div>
+    <div id="ui" style="display:none">
+      <ul id="list"></ul>
+    </div>
+  </body>
+  <script src="solid-auth-client.bundle.js"></script>
+  <script src="rdflib.min.js"></script>
+  <script>
+    window.onload = () => {
+      console.log('document ready')
+      solid.auth.trackSession(session => {
+        if (!session) {
+          console.log('The user is not logged in')
+          document.getElementById('loginBanner').innerHTML = `<button onclick="popupLogin()">Log in</button>`;
+          document.getElementById('ui').style.display = 'none';
+        } else {
+          console.log(`Logged in as ${session.webId}`)
 
-        // Set up cross-site proxy
-        const $rdf = UI.rdf
-        $rdf.Fetcher.crossSiteProxyTemplate = self.origin + '/xss/?uri={uri}'
-
-        // Authenticate the user
-        UI.authn.checkUser()
-          .then(function () {
-            // Set up the view for the current subject
-            const kb = UI.store
-            const uri = window.location.href
-            const subject = kb.sym(uri)
-            const outliner = panes.getOutliner(document)
-            outliner.GotoSubject(subject, true, undefined, true, undefined)
-          })
+          document.getElementById('loginBanner').innerHTML = `Logged in as ${session.webId} <button onclick="solid.auth.logout()">Log out</button>`;
+          document.getElementById('ui').style.display = 'block';
+        }
       })
-    </script>
-</head>
-<body>
-<div class="TabulatorOutline" id="DummyUUID">
-    <table id="outline"></table>
-</div>
-</body>
+    }
+    async function popupLogin() {
+      let session = await solid.auth.currentSession();
+      let popupUri = 'popup.html';
+      if (!session) {
+        session = await solid.auth.popupLogin({ popupUri });
+      }
+    }
+    async function openResource() {
+      const url = window.location
+      console.log('resource opened', url)
+      const response = await solid.auth.fetch(url, {
+        headers: {
+          'Accept': 'text/turtle'
+        }
+      });
+      const body = await response.text()
+      console.log(body)
+      const store = new $rdf.IndexedFormula
+      const urlSym = store.sym(url);
+      const urlDoc  = urlSym.doc();
+      $rdf.parse(body, store, urlDoc.uri, `text/turtle`);
+      const quads = store.match(urlSym, store.sym('http://www.w3.org/ns/ldp#contains'), null, urlDoc);
+      if (quads.length < 1) {
+        console.log('did not find ldp:contains links in the container description')
+      }
+      document.getElementById('list').innerHTML = quads.map(quad => `<li><a href="?#resource=${quad.object.value}">${quad.object.value}</a></li>`).join('\n')
+    }
+    openResource()
+  </script
 </html>
