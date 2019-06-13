@@ -5,11 +5,13 @@ import { BlobTreeInMem, BlobTree, makeHandler, Path } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
+import Router from 'koa-router'
 import { defaultConfiguration } from 'solid-idp'
 
 const debug = Debug('server')
 
 const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
+const LOGIN_HTML = fs.readFileSync('./static/popup.html')
 
 export class Server {
   storage: BlobTree
@@ -30,13 +32,25 @@ export class Server {
   async listen () {
      this.idpRouter = await defaultConfiguration({
        issuer: this.aud,
-       pathPrefix: 'account'
+       pathPrefix: '/account'
      })
 
     this.app = new Koa()
     debug(this.idpRouter)
     this.app.use(this.idpRouter.routes())
     this.app.use(this.idpRouter.allowedMethods())
+  
+    // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
+    const loginRouter = new Router()
+    loginRouter.get('/.well-known/solid/login', (ctx, next) => {
+      ctx.res.writeHead(200, {})
+      ctx.res.end(LOGIN_HTML)
+      ctx.respond = false
+    })
+    this.app.use(loginRouter.routes())
+    this.app.use(loginRouter.allowedMethods())
+    // END HACK
+
     this.app.use(async (ctx, next) => {
       debug('yes!')
       debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))

@@ -1,7 +1,7 @@
 import { Server } from './server'
 
 // on startup:
-const port = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 8080
+const port = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 3000
 
 const aud = process.env.AUD || 'https://localhost:8443'
 
