@@ -16,16 +16,15 @@ const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
 
 interface HttpsConfig {
-  key: Buffer,
+  key: Buffer
   cert: Buffer
 }
 
 interface OptionsObject {
-  port: number,
-  aud: string,
-  skipWac: boolean,
-  httpsConfig: HttpsConfig | undefined,
-  owner: string
+  port: number
+  aud: string
+  httpsConfig?: HttpsConfig
+  owner?: string
 }
 
 export class Server {
@@ -39,17 +38,20 @@ export class Server {
   aud: string
   handler: any
   httpsConfig: HttpsConfig | undefined
-  owner: string
+  owner: string | undefined
   constructor (options: OptionsObject) {
     this.port = options.port
     this.aud = options.aud
     this.httpsConfig = options.httpsConfig
     this.owner = options.owner
     this.storage = new BlobTreeRedis() // singleton in-memory storage
-    this.handler = makeHandler(this.storage, options.aud, options.skipWac)
+    const skipWac = (options.owner === undefined)
+    this.handler = makeHandler(this.storage, options.aud, skipWac)
   }
   provision () {
-    return setRootAcl(this.storage, this.owner)
+    if (this.owner) {
+      return setRootAcl(this.storage, this.owner)
+    }
   }
   async listen () {
     this.idpRouter = await defaultConfiguration({
