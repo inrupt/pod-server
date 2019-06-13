@@ -13,12 +13,12 @@ const debug = Debug('server')
 
 const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 
-type HttpsConfig = {
+interface HttpsConfig {
   key: Buffer,
   cert: Buffer
 }
 
-type OptionsObject = {
+interface OptionsObject {
   port: number,
   aud: string,
   skipWac: boolean,
