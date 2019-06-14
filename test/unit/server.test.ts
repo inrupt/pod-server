@@ -5,7 +5,7 @@ const PORT = 8082
 let server: Server
 
 test('server', async () => {
-  server = new Server({ port: PORT, aud: `http://localhost:${PORT}`, owner: 'https://localhost/#me' })
+  server = new Server({ port: PORT, aud: `http://localhost:${PORT}`, owner: new URL('https://localhost/#me') })
   await server.listen()
   server.close()
 })

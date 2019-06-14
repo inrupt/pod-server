@@ -2,9 +2,9 @@ import { Server } from '../../src/server'
 
 let server: Server
 
-export async function startServer (port: number) {
+export function startServer (port: number): Promise<void> {
   server = new Server({ port, aud: `http://localhost:${port}` })
-  await server.listen()
+  return server.listen()
 }
 
 export function stopServer () {

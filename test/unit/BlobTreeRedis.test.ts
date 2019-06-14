@@ -5,7 +5,7 @@ import { Path } from 'wac-ldp'
 test('set-then-get', async () => {
   const storage = new BlobTreeRedis()
   await storage.select(1)
-  const blob = storage.getBlob(new Path(['root', 'foo', 'bar']))
+  const blob = storage.getBlob(new Path(['v1', 'foo', 'bar'], false))
   await blob.setData(bufferToStream(Buffer.from('yes')))
   const readBackStream = await blob.getData()
   const readBack = await streamToBuffer(readBackStream)
@@ -18,17 +18,17 @@ test('set-then-get', async () => {
 test('add to parent recursively (mkdir -p)', async () => {
   const storage = new BlobTreeRedis()
   await storage.select(2)
-  const blob = storage.getBlob(new Path(['root', 'foo', 'bar', 'baz']))
+  const blob = storage.getBlob(new Path(['v1', 'foo', 'bar', 'baz'], false))
   await blob.setData(bufferToStream(Buffer.from('yes')))
-  const container1 = storage.getContainer(new Path(['root', 'foo']))
+  const container1 = storage.getContainer(new Path(['v1', 'foo'], true))
   const members1 = await container1.getMembers()
   expect(members1).toEqual([
-    { name: 'root/foo/bar', isContainer: true }
+    { name: 'v1/foo/bar/', isContainer: true }
   ])
-  const container2 = storage.getContainer(new Path(['root', 'foo', 'bar']))
+  const container2 = storage.getContainer(new Path(['v1', 'foo', 'bar'], true))
   const members2 = await container2.getMembers()
   expect(members2).toEqual([
-    { name: 'root/foo/bar/baz', isContainer: false }
+    { name: 'v1/foo/bar/baz', isContainer: false }
   ])
   await storage.flushdb()
   await storage.stop()
@@ -37,15 +37,15 @@ test('add to parent recursively (mkdir -p)', async () => {
 test('remove from parent but not recursively', async () => {
   const storage = new BlobTreeRedis()
   await storage.select(3)
-  const blob = storage.getBlob(new Path(['root', 'foo', 'bar', 'baz']))
+  const blob = storage.getBlob(new Path(['v1', 'foo', 'bar', 'baz'], false))
   await blob.setData(bufferToStream(Buffer.from('yes')))
   await blob.delete()
-  const container1 = storage.getContainer(new Path(['root', 'foo']))
+  const container1 = storage.getContainer(new Path(['v1', 'foo'], true))
   const members1 = await container1.getMembers()
   expect(members1).toEqual([
-    { name: 'root/foo/bar', isContainer: true }
+    { name: 'v1/foo/bar/', isContainer: true }
   ])
-  const container2 = storage.getContainer(new Path(['root', 'foo', 'bar']))
+  const container2 = storage.getContainer(new Path(['v1', 'foo', 'bar'], true))
   const members2 = await container2.getMembers()
   expect(members2).toEqual([ ])
   await storage.flushdb()
@@ -55,9 +55,9 @@ test('remove from parent but not recursively', async () => {
 test('exists', async () => {
   const storage = new BlobTreeRedis()
   await storage.select(4)
-  const blob = storage.getBlob(new Path(['root', 'foo', 'bar', 'baz']))
-  const container1 = storage.getContainer(new Path(['root', 'foo']))
-  const container2 = storage.getContainer(new Path(['root', 'foo', 'bar']))
+  const blob = storage.getBlob(new Path(['v1', 'foo', 'bar', 'baz'], false))
+  const container1 = storage.getContainer(new Path(['v1', 'foo'], true))
+  const container2 = storage.getContainer(new Path(['v1', 'foo', 'bar'], true))
   expect(await container1.exists()).toEqual(false)
   expect(await container2.exists()).toEqual(false)
   expect(await blob.exists()).toEqual(false)
