@@ -46,7 +46,7 @@ export class Server {
     this.owner = options.owner
     this.storage = new BlobTreeRedis() // singleton in-memory storage
     const skipWac = (options.owner === undefined)
-    this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), false)
+    this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), skipWac)
   }
   provision () {
     if (this.owner) {

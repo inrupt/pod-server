@@ -27,6 +27,7 @@ const server = new Server({ port, aud, httpsConfig, owner: new URL(ownerStr) })
 async function startServer () {
   await server.provision()
   await server.listen()
+  console.log('listening on ' + port)
 }
 
 // tslint:disable-next-line: no-floating-promises
