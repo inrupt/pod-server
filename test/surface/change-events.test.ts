@@ -11,7 +11,7 @@ const bearerToken = fs.readFileSync('test/fixtures/bearerToken')
 
 beforeEach(async () => {
   MockDate.set(1434319925275)
-  startServer(8081)
+  await startServer(8081)
   const options = await fetch('http://localhost:8081/asdf/test.txt', {
     method: 'HEAD',
     headers: {
@@ -23,7 +23,7 @@ beforeEach(async () => {
   if (!updatesVia) {
     throw new Error('No Updates-Via header found on HEAD')
   }
-  wsClient = new WebSocket(updatesVia)
+  wsClient = new WebSocket(updatesVia, undefined, { origin: 'https://pheyvaer.github.io' })
   received = new Promise((resolve) => {
     wsClient.on('message', function incoming (data) {
       console.log('subscribed')

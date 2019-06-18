@@ -104,11 +104,6 @@ export class Server {
         this.hub.publishChange(event.url)
       }
     })
-    this.storage.on('delete', (event: { url: URL }) => {
-      if (this.hub) {
-        this.hub.publishChange(event.url)
-      }
-    })
     debug('listening on port', this.port, (this.httpsConfig ? 'https' : 'http'))
   }
   close () {
