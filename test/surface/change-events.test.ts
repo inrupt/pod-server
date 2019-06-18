@@ -44,7 +44,8 @@ afterEach(() => {
   stopServer()
 })
 
-test.only('publishes a change event', async () => {
+// pending https://github.com/inrupt/wac-ldp/issues/87
+test.skip('publishes a change event', async () => {
   await fetch('http://localhost:8081/asdf/test.txt', {
     method: 'PUT',
     body:  'hello',

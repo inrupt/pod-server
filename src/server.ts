@@ -46,7 +46,8 @@ export class Server {
     this.owner = options.owner
     this.storage = new BlobTreeRedis() // singleton in-memory storage
     const skipWac = (options.owner === undefined)
-    this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), skipWac)
+    // FIXME: https://github.com/inrupt/wac-ldp/issues/87
+    this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), true /* skipWac */)
   }
   provision () {
     if (this.owner) {
@@ -99,7 +100,7 @@ export class Server {
     })
     this.hub = new Hub(this.wacLdp, this.aud)
     this.wsServer.on('connection', this.hub.handleConnection.bind(this.hub))
-    this.storage.on('change', (event: { url: URL }) => {
+    this.wacLdp.on('change', (event: { url: URL }) => {
       if (this.hub) {
         this.hub.publishChange(event.url)
       }

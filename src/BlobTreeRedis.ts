@@ -1,10 +1,13 @@
 import * as redis from 'redis'
+import Debug from 'debug'
 import { BlobTree, Path } from 'wac-ldp'
 import { Blob } from 'wac-ldp/src/lib/storage/Blob'
 import { Container, Member } from 'wac-ldp/src/lib/storage/Container'
 import { EventEmitter } from 'events'
 import { promisify } from 'util'
 import { streamToBuffer, bufferToStream } from './streams'
+
+const debug = Debug('BlobTreeRedis')
 
 class BlobRedis implements Blob {
   path: Path
@@ -30,7 +33,12 @@ class BlobRedis implements Blob {
   async getData () {
     await this.checkWatch()
     const ret = await this.client.get(this.path.toString())
-    return bufferToStream(Buffer.from(ret))
+    debug('got data from redis', this.path.toString(), ret)
+    if (ret) {
+      return bufferToStream(Buffer.from(ret))
+    } else {
+      return ret
+    }
   }
   async setData (stream: ReadableStream) {
     await this.checkWatch() // to support optimistic locking for setData-then-delete
