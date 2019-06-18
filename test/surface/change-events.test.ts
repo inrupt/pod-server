@@ -19,20 +19,17 @@ beforeEach(async () => {
     }
   })
   const updatesVia = options.headers.get('updates-via')
-  console.log({ updatesVia })
   if (!updatesVia) {
     throw new Error('No Updates-Via header found on HEAD')
   }
   wsClient = new WebSocket(updatesVia, undefined, { origin: 'https://pheyvaer.github.io' })
   received = new Promise((resolve) => {
     wsClient.on('message', function incoming (data) {
-      console.log('subscribed')
       resolve(data.toString())
     })
   })
   await new Promise((resolve) => {
     wsClient.on('open', function open () {
-      console.log('client open, subscribing')
       wsClient.send('sub http://localhost:8081/asdf/')
       resolve(undefined)
     })
