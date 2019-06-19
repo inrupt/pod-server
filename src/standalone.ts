@@ -17,16 +17,17 @@ if (tlsDir) {
   }
 }
 
-const owner = process.env.OWNER
-if (!owner) {
+const ownerStr: string | undefined = process.env.OWNER
+if (!ownerStr) {
   throw new Error('OWNER environment variable required')
 }
 
-const server = new Server({ port, aud, skipWac, httpsConfig, owner })
+const server = new Server({ port, aud, httpsConfig, owner: new URL(ownerStr) })
 
 async function startServer () {
   await server.provision()
   await server.listen()
+  console.log('listening on ' + port)
 }
 
 // tslint:disable-next-line: no-floating-promises

@@ -1,34 +1,22 @@
 <!DOCTYPE html>
-<html id="docHTML">
-<head>
-    <link type="text/css" rel="stylesheet" href="https://solid.github.io/solid-panes/style/tabbedtab.css" />
-    <script type="text/javascript" src="https://inrupt.net/common/js/mashlib.min.js"></script>
-    <script>
-      const $SOLID_GLOBAL_config = {}
-      document.addEventListener('DOMContentLoaded', function () {
-        const panes = require('mashlib')
-        const UI = panes.UI
-
-        // Set up cross-site proxy
-        const $rdf = UI.rdf
-        $rdf.Fetcher.crossSiteProxyTemplate = self.origin + '/xss/?uri={uri}'
-
-        // Authenticate the user
-        UI.authn.checkUser()
-          .then(function () {
-            // Set up the view for the current subject
-            const kb = UI.store
-            const uri = window.location.href
-            const subject = kb.sym(uri)
-            const outliner = panes.getOutliner(document)
-            outliner.GotoSubject(subject, true, undefined, true, undefined)
-          })
-      })
-    </script>
-</head>
-<body>
-<div class="TabulatorOutline" id="DummyUUID">
-    <table id="outline"></table>
-</div>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Browse this pod</title>
+  </head>
+  <body>
+    <h1>Browse this pod</h1>
+    <p>
+      This is a Solid pod. You can use Solid apps to access the data on it. Examples:
+      <ul>
+        <li><a href="https://solid-open-with.5apps.com/">solid-open-with</a>: browse this pod's content and open resources.</li>
+        <li><a href="https://solid-notify.5apps.com/">solid-notify</a>: get notified when resources on this pod change</li>
+      </ul> 
+    </p>
+  </body>
+  <script>
+    for (let a of document.getElementsByTagName('a')) {
+      a.href += '#' + encodeURIComponent(window.location)
+    }
+  </script>
 </html>

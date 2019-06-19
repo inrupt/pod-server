@@ -3,7 +3,7 @@ import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
 import { BlobTreeRedis } from './BlobTreeRedis'
-import { BlobTree, makeHandler, Path, setRootAcl } from 'wac-ldp'
+import { BlobTree, WacLdp } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -16,16 +16,15 @@ const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
 
 interface HttpsConfig {
-  key: Buffer,
+  key: Buffer
   cert: Buffer
 }
 
 interface OptionsObject {
-  port: number,
-  aud: string,
-  skipWac: boolean,
-  httpsConfig: HttpsConfig | undefined,
-  owner: string
+  port: number
+  aud: string
+  httpsConfig?: HttpsConfig
+  owner?: URL
 }
 
 export class Server {
@@ -37,31 +36,35 @@ export class Server {
   app: Koa | undefined
   idpRouter: any
   aud: string
-  handler: any
+  wacLdp: WacLdp
   httpsConfig: HttpsConfig | undefined
-  owner: string
+  owner: URL | undefined
   constructor (options: OptionsObject) {
     this.port = options.port
     this.aud = options.aud
     this.httpsConfig = options.httpsConfig
     this.owner = options.owner
     this.storage = new BlobTreeRedis() // singleton in-memory storage
-    this.handler = makeHandler(this.storage, options.aud, options.skipWac)
+    const skipWac = (options.owner === undefined)
+    // FIXME: https://github.com/inrupt/wac-ldp/issues/87
+    this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), true /* skipWac */)
   }
   provision () {
-    return setRootAcl(this.storage, this.owner)
+    if (this.owner) {
+      return this.wacLdp.setRootAcl(this.owner)
+    }
   }
   async listen () {
-     this.idpRouter = await defaultConfiguration({
-       issuer: this.aud,
-       pathPrefix: '/account'
-     })
+    this.idpRouter = await defaultConfiguration({
+      issuer: this.aud,
+      pathPrefix: '/account'
+    })
 
     this.app = new Koa()
     debug(this.idpRouter)
     this.app.use(this.idpRouter.routes())
     this.app.use(this.idpRouter.allowedMethods())
-  
+
     // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
     const loginRouter = new Router()
     loginRouter.get('/.well-known/solid/login', (ctx, next) => {
@@ -74,7 +77,6 @@ export class Server {
     // END HACK
 
     this.app.use(async (ctx, next) => {
-      debug('yes!')
       debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
       if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
         ctx.res.writeHead(200, {})
@@ -82,7 +84,7 @@ export class Server {
         ctx.respond = false
       } else {
         debug('LDP handler', ctx.req.method, ctx.req.url)
-        this.handler(ctx.req, ctx.res)
+        await this.wacLdp.handler(ctx.req, ctx.res)
         ctx.respond = false
       }
     })
@@ -95,16 +97,11 @@ export class Server {
     this.wsServer = new WebSocket.Server({
       server: this.server
     })
-    this.hub = new Hub(this.aud)
+    this.hub = new Hub(this.wacLdp, this.aud)
     this.wsServer.on('connection', this.hub.handleConnection.bind(this.hub))
-    this.storage.on('change', (event: { path: Path }) => {
+    this.wacLdp.on('change', (event: { url: URL }) => {
       if (this.hub) {
-        this.hub.publishChange(event.path, this.storage)
-      }
-    })
-    this.storage.on('delete', (event: { path: Path }) => {
-      if (this.hub) {
-        this.hub.publishChange(event.path, this.storage)
+        this.hub.publishChange(event.url)
       }
     })
     debug('listening on port', this.port, (this.httpsConfig ? 'https' : 'http'))
