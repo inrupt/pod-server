@@ -1,59 +1,22 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Solid App</title>
+    <title>Browse this pod</title>
   </head>
   <body>
-    <div id="loginBanner"></div>
-    <div id="ui" style="display:none">
-      <ul id="list"></ul>
-    </div>
+    <h1>Browse this pod</h1>
+    <p>
+      This is a Solid pod. You can use Solid apps to access the data on it. Examples:
+      <ul>
+        <li><a href="https://solid-open-with.5apps.com/">solid-open-with</a>: browse this pod's content and open resources.</li>
+        <li><a href="https://solid-notify.5apps.com/">solid-notify</a>: get notified when resources on this pod change</li>
+      </ul> 
+    </p>
   </body>
-  <script src="https://raw.githubusercontent.com/inrupt/pod-server/open-with/static/solid-auth-client.bundle.js"></script>
-  <script src="https://raw.githubusercontent.com/inrupt/pod-server/open-with/static/rdflib.min.js"></script>
   <script>
-    window.onload = () => {
-      console.log('document ready')
-      solid.auth.trackSession(session => {
-        if (!session) {
-          console.log('The user is not logged in')
-          document.getElementById('loginBanner').innerHTML = `<button onclick="popupLogin()">Log in</button>`;
-          document.getElementById('ui').style.display = 'none';
-        } else {
-          console.log(`Logged in as ${session.webId}`)
-
-          document.getElementById('loginBanner').innerHTML = `Logged in as ${session.webId} <button onclick="solid.auth.logout()">Log out</button>`;
-          document.getElementById('ui').style.display = 'block';
-        }
-      })
+    for (let a of document.getElementsByTagName('a')) {
+      a.href += '#' + encodeURIComponent(window.location)
     }
-    async function popupLogin() {
-      let session = await solid.auth.currentSession();
-      let popupUri = 'popup.html';
-      if (!session) {
-        session = await solid.auth.popupLogin({ popupUri });
-      }
-    }
-    async function openResource() {
-      const url = window.location
-      console.log('resource opened', url)
-      const response = await solid.auth.fetch(url, {
-        headers: {
-          'Accept': 'text/turtle'
-        }
-      });
-      const body = await response.text()
-      console.log(body)
-      const store = new $rdf.IndexedFormula
-      const urlSym = store.sym(url);
-      const urlDoc  = urlSym.doc();
-      $rdf.parse(body, store, urlDoc.uri, `text/turtle`);
-      const quads = store.match(urlSym, store.sym('http://www.w3.org/ns/ldp#contains'), null, urlDoc);
-      if (quads.length < 1) {
-        console.log('did not find ldp:contains links in the container description')
-      }
-      document.getElementById('list').innerHTML = quads.map(quad => `<li><a href="?#resource=${quad.object.value}">${quad.object.value}</a></li>`).join('\n')
-    }
-    openResource()
-  </script
+  </script>
 </html>
