@@ -77,7 +77,6 @@ export class Server {
     // END HACK
 
     this.app.use(async (ctx, next) => {
-      debug('yes!')
       debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
       if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
         ctx.res.writeHead(200, {})
