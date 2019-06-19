@@ -1,4 +1,5 @@
 import { Server } from './server'
+import { BlobTreeRedis } from './BlobTreeRedis'
 import * as fs from 'fs'
 
 // on startup:
@@ -22,7 +23,13 @@ if (!ownerStr) {
   throw new Error('OWNER environment variable required')
 }
 
-const server = new Server({ port, aud, httpsConfig, owner: new URL(ownerStr) })
+const server = new Server({
+  port,
+  aud,
+  httpsConfig,
+  owner: new URL(ownerStr),
+  storage: new BlobTreeRedis(process.env.REDIS_URL) // Redis-based BlobTree storage
+})
 
 async function startServer () {
   await server.provision()

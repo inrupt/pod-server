@@ -2,7 +2,6 @@ import * as http from 'http'
 import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
-import { BlobTreeRedis } from './BlobTreeRedis'
 import { BlobTree, WacLdp } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
@@ -25,6 +24,7 @@ interface OptionsObject {
   aud: string
   httpsConfig?: HttpsConfig
   owner?: URL
+  storage: BlobTree
 }
 
 export class Server {
@@ -44,7 +44,7 @@ export class Server {
     this.aud = options.aud
     this.httpsConfig = options.httpsConfig
     this.owner = options.owner
-    this.storage = new BlobTreeRedis(REDIS_URL) // Redis-based BlobTree storage
+    this.storage = options.storage
     const skipWac = (options.owner === undefined)
     // FIXME: https://github.com/inrupt/wac-ldp/issues/87
     this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), true /* skipWac */)
