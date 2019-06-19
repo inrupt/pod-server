@@ -5,7 +5,7 @@ import * as fs from 'fs'
 // on startup:
 const port = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 3000
 
-const aud = process.env.AUD || 'https://localhost:8443'
+const aud = process.env.AUD || 'http://localhost:3000'
 
 const skipWac: boolean = !!process.env.SKIP_WAC
 
@@ -18,9 +18,10 @@ if (tlsDir) {
   }
 }
 
-const ownerStr: string | undefined = process.env.OWNER
+let ownerStr: string | undefined = process.env.OWNER
 if (!ownerStr) {
-  throw new Error('OWNER environment variable required')
+  // throw new Error('OWNER environment variable required')
+  ownerStr = 'https://jackson.solid.community/profile/card#me'
 }
 
 const server = new Server({

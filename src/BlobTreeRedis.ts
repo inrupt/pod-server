@@ -56,7 +56,7 @@ class BlobRedis implements Blob {
     let isContainer = 'false'
     do {
       parentPath = childPath.toParent()
-      multi.hset(parentPath.toString(), childPath.toString(), isContainer)
+      multi.hset(parentPath.toString(), childPath.toName(), isContainer)
       isContainer = 'true'
       childPath = parentPath
     } while (!parentPath.isRoot())
