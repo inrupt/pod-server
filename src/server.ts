@@ -44,7 +44,7 @@ export class Server {
     this.aud = options.aud
     this.httpsConfig = options.httpsConfig
     this.owner = options.owner
-    this.storage = new BlobTreeRedis() // singleton in-memory storage
+    this.storage = new BlobTreeRedis(REDIS_URL) // Redis-based BlobTree storage
     const skipWac = (options.owner === undefined)
     // FIXME: https://github.com/inrupt/wac-ldp/issues/87
     this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), true /* skipWac */)

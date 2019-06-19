@@ -128,9 +128,9 @@ function promisifyRedisClient (callbacksClient: any) {
 export class BlobTreeRedis extends EventEmitter implements BlobTree {
   callbacksClient: any
   client: any
-  constructor () {
+  constructor (redisUrl: string) {
     super()
-    this.callbacksClient = redis.createClient()
+    this.callbacksClient = redis.createClient(redisUrl)
     this.client = promisifyRedisClient(this.callbacksClient)
   }
   select (dbIndex: number) {
