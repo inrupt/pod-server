@@ -39,7 +39,8 @@
     "test": "npm run lint && npm run jest",
     "docs": "typedoc --out docs --mode modules src",
     "coverage": "jest --coverage",
-    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls",
+    "prepare": "cd node_modules/wac-ldp ; npm install ; npm run build ; cd ../websockets-pubsub ; npm install ; npm run build ; cd ../.."
   },
   "repository": {
     "type": "git",
