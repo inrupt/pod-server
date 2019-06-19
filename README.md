@@ -45,8 +45,8 @@ Apart from that, it exposes a number of interfaces which the websockets-pubsub m
 ### websockets-pubsub
 The [websockets-pubsub](https://github.com/inrupt/websockets-pubsub) module exposes a 'Hub' object, with a websocket-onconnection handler and a publish method
 
-### data-browser
-Not really a dependency, but the [data-browser](https://github.com/linkeddata/mashlib) is referred to as a client-side script include by static content which the pod-server serves when a user visits the pod-server with their browser.
+### html statics
+Although some pod providers may choose to replace `static/index.html` with the [data-browser](https://github.com/linkeddata/mashlib). This is the content which the pod-server serves when a user visits the pod-server with their browser.
 
 Published under an MIT license by inrupt, Inc.
 
