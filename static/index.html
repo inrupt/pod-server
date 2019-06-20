@@ -3,20 +3,20 @@
   <head>
     <meta charset="utf-8">
     <title>Browse this pod</title>
+    <style>
+      body {background-color: #404040 }
+      div { width: 40em; margin: 5em auto; padding: 3em; border-radius: 1em; color: #404040; background-color: #D3FDFF }
+      div font {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 50%;
+      }
+    </style>
   </head>
   <body>
-    <h1>Browse this pod</h1>
-    <p>
-      This is a Solid pod. You can use Solid apps to access the data on it. Examples:
-      <ul>
-        <li><a href="https://solid-open-with.5apps.com/">solid-open-with</a>: browse this pod's content and open resources.</li>
-        <li><a href="https://solid-notify.5apps.com/">solid-notify</a>: get notified when resources on this pod change</li>
-      </ul> 
-    </p>
+    <div onclick="window.location='https://solid-filemanager.solid.community/public/nightly/?url='+window.location">
+      <font size="7" class=".center">Browse this pod</font>
+    </div>
   </body>
-  <script>
-    for (let a of document.getElementsByTagName('a')) {
-      a.href += '#' + encodeURIComponent(window.location)
-    }
-  </script>
 </html>
