@@ -55,6 +55,7 @@ export class Server {
     }
   }
   async listen () {
+    debug('setting IDP issuer to', this.aud)
     this.idpRouter = await defaultConfiguration({
       issuer: this.aud,
       pathPrefix: '/account'
