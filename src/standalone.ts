@@ -31,11 +31,11 @@ if (!ownerStr) {
 let storage
 if (process.env.REDIS_URL) {
   debug('using redis backend')
-  storage =  new BlobTreeRedis(process.env.REDIS_URL)
- } else {
+  storage = new BlobTreeRedis(process.env.REDIS_URL)
+} else {
   debug('using in-memory backend')
   storage = new BlobTreeInMem()
- } 
+}
 const server = new Server({
   port,
   aud,
