@@ -49,6 +49,7 @@ class BlobRedis implements Blob {
     const multi = this.client.multi()
     // method calls on the multi object are synchronous
     // except for multi.exec, which is asynchronous again.
+    debug('setting resource itself', this.path.toString())
     multi.set(this.path.toString(), value.toString())
     // mkdir -p:
     let childPath = this.path
@@ -56,6 +57,7 @@ class BlobRedis implements Blob {
     let isContainer = 'false'
     do {
       parentPath = childPath.toParent()
+      debug('adding to ancestor', parentPath.toString(), childPath.toName(), isContainer)
       multi.hset(parentPath.toString(), childPath.toName(), isContainer)
       isContainer = 'true'
       childPath = parentPath
@@ -75,9 +77,11 @@ class BlobRedis implements Blob {
     const multi = this.client.multi()
     // method calls on the multi object are synchronous
     // except for multi.exec, which is asynchronous again.
+    debug('deleting resource itself', this.path.toString())
     multi.del(this.path.toString())
     const parentPath = this.path.toParent().toString()
-    multi.hdel(parentPath, this.path.toString())
+    debug('deleting member from parent', parentPath.toString(), this.path.toName())
+    multi.hdel(parentPath, this.path.toName())
     // See https://redis.io/topics/transactions for more details,
     // specifically the 'Optimistic locking using check-and-set' section.
     await multi.exec()
@@ -128,7 +132,7 @@ function promisifyRedisClient (callbacksClient: any) {
 export class BlobTreeRedis extends EventEmitter implements BlobTree {
   callbacksClient: any
   client: any
-  constructor (redisUrl: string | undefined) {
+  constructor (redisUrl?: string) {
     super()
     this.callbacksClient = (redisUrl ? redis.createClient(redisUrl) : redis.createClient())
     this.client = promisifyRedisClient(this.callbacksClient)

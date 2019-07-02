@@ -23,12 +23,12 @@ test('add to parent recursively (mkdir -p)', async () => {
   const container1 = storage.getContainer(new Path(['v1', 'foo'], true))
   const members1 = await container1.getMembers()
   expect(members1).toEqual([
-    { name: 'v1/foo/bar/', isContainer: true }
+    { name: 'bar', isContainer: true }
   ])
   const container2 = storage.getContainer(new Path(['v1', 'foo', 'bar'], true))
   const members2 = await container2.getMembers()
   expect(members2).toEqual([
-    { name: 'v1/foo/bar/baz', isContainer: false }
+    { name: 'baz', isContainer: false }
   ])
   await storage.flushdb()
   await storage.stop()
@@ -43,7 +43,7 @@ test('remove from parent but not recursively', async () => {
   const container1 = storage.getContainer(new Path(['v1', 'foo'], true))
   const members1 = await container1.getMembers()
   expect(members1).toEqual([
-    { name: 'v1/foo/bar/', isContainer: true }
+    { name: 'bar', isContainer: true }
   ])
   const container2 = storage.getContainer(new Path(['v1', 'foo', 'bar'], true))
   const members2 = await container2.getMembers()
