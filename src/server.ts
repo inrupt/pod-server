@@ -58,9 +58,9 @@ export class Server {
     debug('setting IDP issuer to', this.aud)
     this.idpRouter = await archiveConfiguration({
       issuer: this.aud,
-      pathPrefix: '/account',
-      screenNameExists: (screenName: string) => Promise.resolve(false),
-      onNewUser: (screenName: string, externalWebId?: string) => Promise.resolve('what should i return here?'),
+      pathPrefix: '',
+      screenNameExists: (screenName: string) => Promise.resolve(`http://${screenName}.local:8080/`),
+      onNewUser: (screenName: string, externalWebId?: string) => Promise.resolve(`http://${screenName}.local:8080/`),
       keystore: {
         'keys': [
           {
