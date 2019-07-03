@@ -82,6 +82,7 @@ export class Server {
     })
 
     this.app = new Koa()
+    this.app.proxy = true
     debug(this.idpRouter)
     this.app.use(this.idpRouter.routes())
     this.app.use(this.idpRouter.allowedMethods())
