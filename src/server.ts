@@ -59,8 +59,8 @@ export class Server {
     this.idpRouter = await archiveConfiguration({
       issuer: this.aud,
       pathPrefix: '',
-      screenNameExists: (screenName: string) => Promise.resolve(`http://${screenName}.local:8080/`),
-      onNewUser: (screenName: string, externalWebId?: string) => Promise.resolve(`http://${screenName}.local:8080/`),
+      screenNameExists: (screenName: string) => Promise.resolve(this.aud + '/profile/card#me'),
+      onNewUser: (screenName: string, externalWebId?: string) => Promise.resolve(this.aud + '/profile/card#me'),
       keystore: {
         'keys': [
           {
