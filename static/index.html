@@ -1,25 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
-    <title>Browse this pod</title>
-    <style>
-      body {background-color: #404040 }
-      div { width: 40em; margin: 5em auto; padding: 3em; border-radius: 1em; color: #404040; background-color: #D3FDFF }
-      div font {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-      }
-    </style>
-  </head>
+    <meta charset="utf-8"/>
+    <title>Solid Data Browser</title>
+  <link href="https://solid.github.io/solid-panes/style/tabbedtab.css" rel="stylesheet"></head>
   <body>
-    <div onclick="window.location='https://mashlib-as-an-app.5apps.com/#resource='+window.location">
-      <font size="7" class=".center">Browse this pod (mashlib)</font>
+    <!-- solid-panes' OutlineManager injects into this element -->
+    <div class="TabulatorOutline" id="DummyUUID">
+        <table id="outline"></table>
     </div>
-    <div onclick="window.location='https://solid-filemanager.solid.community/public/nightly/?url='+window.location">
-      <font size="7" class=".center">Browse this pod (filemanager)</font>
-    </div>
-  </body>
+  <script type="text/javascript" src="https://solid.github.io/mashlib/dist/mashlib.js"></script></body>
 </html>
