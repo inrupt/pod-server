@@ -9,7 +9,7 @@ const debug = Debug('standalone')
 // on startup:
 const port = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 8080
 
-const aud = process.env.AUD || `http://localhost:${port}`
+const rootDomain = process.env.ROOT_DOMAIN || `localhost:${port}`
 
 const skipWac: boolean = !!process.env.SKIP_WAC
 
@@ -36,16 +36,26 @@ if (process.env.REDIS_URL) {
   debug('using in-memory backend')
   storage = new BlobTreeInMem()
 }
+
+let keystore: any
+if (process.env.KEY_STORE) {
+  try {
+    keystore = JSON.parse(fs.readFileSync(process.env.KEY_STORE).toString())
+  } catch (e) {
+    console.error('failed to read IDP keystore from ', process.env.KEY_STORE)
+  }
+}
+
 const server = new Server({
   port,
-  aud,
+  rootDomain,
   httpsConfig,
-  owner: new URL(ownerStr),
-  storage
+  storage,
+  keystore
 })
 
 async function startServer () {
-  await server.provision()
+  // await server.provision()
   await server.listen()
   console.log('listening on ' + port)
 }

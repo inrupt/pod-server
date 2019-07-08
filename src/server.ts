@@ -7,7 +7,7 @@ import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
 import Router from 'koa-router'
-import { archiveConfiguration } from 'solid-archive-idp'
+import { archiveConfiguration } from '../src/index'
 
 const debug = Debug('server')
 
@@ -21,10 +21,10 @@ interface HttpsConfig {
 
 interface OptionsObject {
   port: number
-  aud: string
+  rootDomain: string
   httpsConfig?: HttpsConfig
-  owner?: URL
   storage: BlobTree
+  keystore: any
 }
 
 export class Server {
@@ -35,57 +35,72 @@ export class Server {
   wsServer: any
   app: Koa | undefined
   idpRouter: any
-  aud: string
+  rootDomain: string
+  rootOrigin: string
   wacLdp: WacLdp
   httpsConfig: HttpsConfig | undefined
-  owner: URL | undefined
+  keystore: any
   constructor (options: OptionsObject) {
     this.port = options.port
-    this.aud = options.aud
+    this.rootDomain = options.rootDomain
     this.httpsConfig = options.httpsConfig
-    this.owner = options.owner
+    this.keystore = options.keystore
+    this.rootOrigin = `http${(this.httpsConfig ? 's' : '')}://${this.rootDomain}`
     this.storage = options.storage
-    const skipWac = (options.owner === undefined)
     // FIXME: https://github.com/inrupt/wac-ldp/issues/87
-    this.wacLdp = new WacLdp(this.storage, this.aud, new URL(`ws://localhost:${this.port}/`), true /* skipWac */)
+    this.wacLdp = new WacLdp(this.storage, this.rootDomain, this.webSocketUrl(), true /* skipWac */, options.rootDomain)
   }
-  provision () {
-    if (this.owner) {
-      return this.wacLdp.setRootAcl(this.owner)
-    }
+  webSocketUrl () {
+    return new URL(`ws${(this.httpsConfig ? 's' : '')}://${this.rootDomain}`)
+  }
+  storageRootToWebId (storageRoot: string) {
+    return storageRoot + (storageRoot.substr(-1) === '/' ? '' : '/') + 'profile/card#me'
+  }
+  screenNameToStorageRoot (screenName: string) {
+    return `http${(this.httpsConfig ? 's' : '')}://${screenName}.${this.rootDomain}`
+  }
+  provision (screenName: string) {
+  // if (this.owner) {
+  //   return this.wacLdp.setRootAcl(this.owner)
+  // }
   }
   async listen () {
-    debug('setting IDP issuer to', this.aud)
+    debug('setting IDP issuer to', this.rootDomain)
     this.idpRouter = await archiveConfiguration({
-      issuer: this.aud,
+      issuer: this.rootOrigin,
       pathPrefix: '',
-      screenNameExists: (screenName: string) => Promise.resolve(this.aud + '/profile/card#me'),
-      onNewUser: (screenName: string, externalWebId?: string) => Promise.resolve(this.aud + '/profile/card#me'),
-      keystore: {
-        'keys': [
-          {
-            'alg': 'RS256',
-            'kty': 'RSA',
-            'kid': 'xeOjes9u3AcU4LBzcanEM7pZLwSlxaN7U62ZzOBDQuw',
-            'e': 'AQAB',
-            'n': 'oB2LgkiZZ5iLAz1d4ua7sVxdbzY2nIRkDtf4UE08mWsD6UYRzLR98_gMAfnKB8i9yPCQkxfA5w_SZq6Y7odG1qSwLHM2mb_O2GSvY9kaG00UpeeEJCR19c7Jkcmq3GXh4yujnm2TFQ6YAzYNgrXkHlusaFUApJaQN6zr4AvmR_vX_5i__Ku7nuU-GbaV75LSr8o0QANdYFF0ooz5DJvydPplF8mO9_oD7ceSNLWP1AXlFs5JH6MEhH02dELb4-zeLcVzhoqON60cABTpbYSf1lLbYZsVUQ3cYE9CxXaByY2YNuQgc0k29mSmUvwEs0hNA5xUcE3-y_qKpYKniErb9Q',
-            'd': 'FmiMIcuvTIRY0DdCcIMCOaxHl0zrD7SnnDw1kGd-16nWfktEKnYIOqC4bX5b_ALoLLseQLfOU4gvVheRZ7CfBWM_FLl7JsFlXXuZ4Et-D9wVy7I_GB_SMniiVTj4JKhNmNF-sKl9MDE-rRRfh6-VIXqLAn8C_AXmYSReTpjbva8T-fq6vHgB9GmRqW4yRpFta3CA2uJpfnQBzIXNuBHFnk7C7e3omgplXHicuuT3GQnKZlhsREXN1BK7_WcK6OZERqnx-fOl42Sq2pNSSLaLu42vhmvvEXBbHUFkEOU4x0QmpdjhpynQS5yS30xJf9NI9DROTSncVbswjLiI_XPOgQ',
-            'p': '7mtMx8m9zSzhWezMirL0neazpIw2lBYJStmCkyoT0rKAw0TJ1rx-sLh_Skn6BbTSNoJWZsiMC9AzUaER3LDBQda_LTYAiEtr3q3TeWjs2O7Q_QCGP2CGCpWrYddWKumv6ye2ZdgORlXAuOqO2GavqZJgpo9b9mTfqRq2pPKADfk',
-            'q': 'q-wVzVmX5dZI8O5JLEMaBRbZtQIx0EyyN9Zy8itWgcfvYdU1WY8-KSZg67ZvkOBSScLx8y3V0wcc5kXD6W5PFKqVfwhfKABHimB8QAKPZCb-RBWDbvciNTi1CPJVNkLBtiiI9MWO6VSytOtokskOvHcA4mwMrIfxD_0XGU4YLN0',
-            'dp': 'B9Uck5-sDZaA3Lxrx86zPJC8rBYzINBMg9n7cSw7tHtKwZ975gMRQmr9O4qMnS1gjovfnMbP2v9_ABqDhLWF08zjQO_6OoAHziv1u5JX3ZSS5wziXCimnqhmFfPGD-jXb6lBU70yUts0Vp7WDIPrF24IoNAq3EBaHKsU_vw8erk',
-            'dq': 'ICtZ3QXhtWEGXwbHbF_V85PWAte5SHfBdU9MTOItGrW1pkHF7M8v23VR92k4sQw4eZLfwRgXhZg0ISZ2xSwd4gkVViLT42FCAbOSLEwOVrgxJb48zLuzi-_jeBwYM8IECzjEf8CjwCdYFSBjfevfNQazhKqhKHt7cPlzpAmH3oU',
-            'qi': 'E3W6OfqeAzVCvylUpavcaBQhBRMEvnargBUSD8LT0smIldDm0SuTZ2fzueTfynd-9tvb9Ny_Tr9uSS-yWDHulnPfQL7LOdI1TWAXEy4278FJZwGCElSvjJafK_KS36sTw614YOV0UitWCd21aMWkKlJboh3kzEZEehFNAz2Iq-M',
-            'key_ops': ['verify']
-          }
-        ]
-      }
+      screenNameExists: async (screenName: string) => {
+        if (this.wacLdp.containerExists(new URL(this.screenNameToStorageRoot(screenName)))) {
+          return this.storageRootToWebId(this.screenNameToStorageRoot(screenName))
+        }
+      },
+      onNewUser: async (screenName: string, externalWebId?: string) => {
+        this.provision(screenName)
+        return this.storageRootToWebId(this.screenNameToStorageRoot(screenName))
+      },
+      keystore: this.keystore
     })
 
     this.app = new Koa()
     this.app.proxy = true
-    debug(this.idpRouter)
-    this.app.use(this.idpRouter.routes())
-    this.app.use(this.idpRouter.allowedMethods())
+    this.app.use(async (ctx, next) => {
+      console.log('headers', ctx.req.headers)
+      ctx.req.headers['x-forwarded-proto'] = 'https'
+      console.log('headers with proto', ctx.req.headers)
+      await next()
+    })
+
+    this.app.use(async (ctx, next) => {
+      debug('data browser on domain root!')
+      debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
+      if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1) && ctx.req.url === '/') {
+        ctx.res.writeHead(200, {})
+        ctx.res.end(DATA_BROWSER_HTML)
+        ctx.respond = false
+      } else {
+        await next()
+      }
+    })
 
     // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
     const loginRouter = new Router()
@@ -97,6 +112,10 @@ export class Server {
     this.app.use(loginRouter.routes())
     this.app.use(loginRouter.allowedMethods())
     // END HACK
+
+    debug(this.idpRouter)
+    this.app.use(this.idpRouter.routes())
+    this.app.use(this.idpRouter.allowedMethods())
 
     this.app.use(async (ctx, next) => {
       debug('yes!')
@@ -120,7 +139,7 @@ export class Server {
     this.wsServer = new WebSocket.Server({
       server: this.server
     })
-    this.hub = new Hub(this.wacLdp, this.aud)
+    this.hub = new Hub(this.wacLdp, this.rootOrigin)
     this.wsServer.on('connection', this.hub.handleConnection.bind(this.hub))
     this.wacLdp.on('change', (event: { url: URL }) => {
       if (this.hub) {
