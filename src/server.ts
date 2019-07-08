@@ -7,6 +7,7 @@ import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
 import Router from 'koa-router'
+import { provisionProfile, provisionStorage } from './provision'
 import { archiveConfiguration } from '../src/index'
 
 const debug = Debug('server')
@@ -53,16 +54,11 @@ export class Server {
   webSocketUrl () {
     return new URL(`ws${(this.httpsConfig ? 's' : '')}://${this.rootDomain}`)
   }
-  storageRootToWebId (storageRoot: string) {
+  storageRootStrToWebIdStr (storageRoot: string) {
     return storageRoot + (storageRoot.substr(-1) === '/' ? '' : '/') + 'profile/card#me'
   }
-  screenNameToStorageRoot (screenName: string) {
+  screenNameToStorageRootStr (screenName: string) {
     return `http${(this.httpsConfig ? 's' : '')}://${screenName}.${this.rootDomain}`
-  }
-  provision (screenName: string) {
-  // if (this.owner) {
-  //   return this.wacLdp.setRootAcl(this.owner)
-  // }
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
@@ -70,13 +66,18 @@ export class Server {
       issuer: this.rootOrigin,
       pathPrefix: '',
       screenNameExists: async (screenName: string) => {
-        if (this.wacLdp.containerExists(new URL(this.screenNameToStorageRoot(screenName)))) {
-          return this.storageRootToWebId(this.screenNameToStorageRoot(screenName))
+        if (this.wacLdp.containerExists(new URL(this.screenNameToStorageRootStr(screenName)))) {
+          return this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenName))
         }
       },
-      onNewUser: async (screenName: string, externalWebId?: string) => {
-        this.provision(screenName)
-        return this.storageRootToWebId(this.screenNameToStorageRoot(screenName))
+      onNewUser: async (screenName: string, externalWebIdStr?: string) => {
+        const storageRootStr = this.screenNameToStorageRootStr(screenName)
+        const webIdStr = externalWebIdStr || this.storageRootStrToWebIdStr(storageRootStr)
+        if (!externalWebIdStr) {
+          await provisionProfile(this.wacLdp, new URL(webIdStr), screenName)
+        }
+        await provisionStorage(this.wacLdp, new URL(storageRootStr), new URL(webIdStr))
+        return webIdStr
       },
       keystore: this.keystore
     })
