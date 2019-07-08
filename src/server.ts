@@ -93,7 +93,7 @@ export class Server {
     this.app.use(async (ctx, next) => {
       debug('data browser on domain root!')
       debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
-      if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1) && ctx.req.url === '/') {
+      if ((ctx.accepts(['*', 'html']) === 'html') && ctx.req.url === '/') {
         ctx.res.writeHead(200, {})
         ctx.res.end(DATA_BROWSER_HTML)
         ctx.respond = false
