@@ -8,7 +8,8 @@ import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
 import Router from 'koa-router'
 import { provisionProfile, provisionStorage } from './provision'
-import { archiveConfiguration } from '../src/index'
+// import { archiveConfiguration } from '../src/index'
+import { defaultConfiguration } from 'solid-idp'
 
 const debug = Debug('server')
 
@@ -62,24 +63,25 @@ export class Server {
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
-    this.idpRouter = await archiveConfiguration({
+    // this.idpRouter = await archiveConfiguration({
+    this.idpRouter = await defaultConfiguration({
       issuer: this.rootOrigin,
       pathPrefix: '',
-      screenNameExists: async (screenName: string) => {
-        if (this.wacLdp.containerExists(new URL(this.screenNameToStorageRootStr(screenName)))) {
-          return this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenName))
-        }
-      },
-      onNewUser: async (screenName: string, externalWebIdStr?: string) => {
-        const storageRootStr = this.screenNameToStorageRootStr(screenName)
-        const webIdStr = externalWebIdStr || this.storageRootStrToWebIdStr(storageRootStr)
-        if (!externalWebIdStr) {
-          await provisionProfile(this.wacLdp, new URL(webIdStr), screenName)
-        }
-        await provisionStorage(this.wacLdp, new URL(storageRootStr), new URL(webIdStr))
-        return webIdStr
-      },
-      keystore: this.keystore
+      // screenNameExists: async (screenName: string) => {
+      //   if (this.wacLdp.containerExists(new URL(this.screenNameToStorageRootStr(screenName)))) {
+      //     return this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenName))
+      //   }
+      // },
+      // onNewUser: async (screenName: string, externalWebIdStr?: string) => {
+      //   const storageRootStr = this.screenNameToStorageRootStr(screenName)
+      //   const webIdStr = externalWebIdStr || this.storageRootStrToWebIdStr(storageRootStr)
+      //   if (!externalWebIdStr) {
+      //     await provisionProfile(this.wacLdp, new URL(webIdStr), screenName)
+      //   }
+      //   await provisionStorage(this.wacLdp, new URL(storageRootStr), new URL(webIdStr))
+      //   return webIdStr
+      // },
+      // keystore: this.keystore
     })
 
     this.app = new Koa()
