@@ -21,6 +21,7 @@ if (tlsDir) {
     cert: fs.readFileSync(`${tlsDir}/fullchain.pem`)
   }
 }
+const useHttps = process.env.USE_HTTPS === 'true' || !!tlsDir
 
 let ownerStr: string | undefined = process.env.OWNER
 if (!ownerStr) {
@@ -51,7 +52,8 @@ const server = new Server({
   rootDomain,
   httpsConfig,
   storage,
-  keystore
+  keystore,
+  useHttps
 })
 
 async function startServer () {

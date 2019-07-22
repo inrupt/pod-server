@@ -6,14 +6,16 @@ import { BlobTree, WacLdp } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
+import session from 'koa-session'
 import Router from 'koa-router'
 import { provisionProfile, provisionStorage } from './provision'
-// import { archiveConfiguration } from '../src/index'
 import { defaultConfiguration } from 'solid-idp'
+import getRootRenderRouter from './rootRender'
+// import { default as Accepts } from 'accepts'
 
 const debug = Debug('server')
 
-const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
+const DATA_BROWSER_PREFIX = 'https://datasister.5apps.com/?idp='
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
 
 interface HttpsConfig {
@@ -26,7 +28,8 @@ interface OptionsObject {
   rootDomain: string
   httpsConfig?: HttpsConfig
   storage: BlobTree
-  keystore: any
+  keystore: any,
+  useHttps: boolean
 }
 
 export class Server {
@@ -41,64 +44,58 @@ export class Server {
   rootOrigin: string
   wacLdp: WacLdp
   httpsConfig: HttpsConfig | undefined
+  useHttps: boolean
   keystore: any
   constructor (options: OptionsObject) {
     this.port = options.port
     this.rootDomain = options.rootDomain
     this.httpsConfig = options.httpsConfig
+    this.useHttps = options.useHttps
     this.keystore = options.keystore
-    this.rootOrigin = `http${(this.httpsConfig ? 's' : '')}://${this.rootDomain}`
+    this.rootOrigin = `http${(this.useHttps ? 's' : '')}://${this.rootDomain}`
     this.storage = options.storage
     // FIXME: https://github.com/inrupt/wac-ldp/issues/87
-    this.wacLdp = new WacLdp(this.storage, this.rootDomain, this.webSocketUrl(), true /* skipWac */, options.rootDomain)
+    this.wacLdp = new WacLdp(this.storage, this.rootDomain, this.webSocketUrl(), false /* skipWac */, options.rootDomain, true)
   }
   webSocketUrl () {
-    return new URL(`ws${(this.httpsConfig ? 's' : '')}://${this.rootDomain}`)
+    return new URL(`ws${(this.useHttps ? 's' : '')}://${this.rootDomain}`)
   }
   storageRootStrToWebIdStr (storageRoot: string) {
     return storageRoot + (storageRoot.substr(-1) === '/' ? '' : '/') + 'profile/card#me'
   }
   screenNameToStorageRootStr (screenName: string) {
-    return `http${(this.httpsConfig ? 's' : '')}://${screenName}.${this.rootDomain}`
+    return `http${(this.useHttps ? 's' : '')}://${this.rootDomain}/${screenName}/`
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
-    // this.idpRouter = await archiveConfiguration({
     this.idpRouter = await defaultConfiguration({
       issuer: this.rootOrigin,
-      pathPrefix: '',
-      // screenNameExists: async (screenName: string) => {
-      //   if (this.wacLdp.containerExists(new URL(this.screenNameToStorageRootStr(screenName)))) {
-      //     return this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenName))
-      //   }
-      // },
-      // onNewUser: async (screenName: string, externalWebIdStr?: string) => {
-      //   const storageRootStr = this.screenNameToStorageRootStr(screenName)
-      //   const webIdStr = externalWebIdStr || this.storageRootStrToWebIdStr(storageRootStr)
-      //   if (!externalWebIdStr) {
-      //     await provisionProfile(this.wacLdp, new URL(webIdStr), screenName)
-      //   }
-      //   await provisionStorage(this.wacLdp, new URL(storageRootStr), new URL(webIdStr))
-      //   return webIdStr
-      // },
-      // keystore: this.keystore
+      pathPrefix: ''
     })
 
     this.app = new Koa()
     this.app.proxy = true
+    this.app.keys = [ 'REPLACE_THIS_LATER' ]
+    this.app.use(session(this.app))
     this.app.use(async (ctx, next) => {
-      console.log('headers', ctx.req.headers)
       ctx.req.headers['x-forwarded-proto'] = 'https'
-      console.log('headers with proto', ctx.req.headers)
       await next()
     })
 
+    this.app.use(this.idpRouter.routes())
+    this.app.use(this.idpRouter.allowedMethods())
+
+    const rootRenderRouter = getRootRenderRouter(this.rootOrigin)
+    this.app.use(rootRenderRouter.routes())
+    this.app.use(rootRenderRouter.allowedMethods())
+
     this.app.use(async (ctx, next) => {
-      debug('data browser on domain root!')
-      debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
-      if ((ctx.accepts(['*', 'html']) === 'html') && ctx.req.url === '/') {
-        ctx.res.writeHead(200, {})
-        ctx.res.end(DATA_BROWSER_HTML)
+      if (ctx.accepts(['text/turtle', 'application/ld+json', 'html']) === 'html') {
+        debug('redirect to data browser!')
+        ctx.res.writeHead(302, {
+          Location: DATA_BROWSER_PREFIX + encodeURIComponent(this.rootOrigin)
+        })
+        ctx.res.end('See ' + DATA_BROWSER_PREFIX + encodeURIComponent(this.rootOrigin))
         ctx.respond = false
       } else {
         await next()
@@ -116,22 +113,17 @@ export class Server {
     this.app.use(loginRouter.allowedMethods())
     // END HACK
 
-    debug(this.idpRouter)
-    this.app.use(this.idpRouter.routes())
-    this.app.use(this.idpRouter.allowedMethods())
-
     this.app.use(async (ctx, next) => {
-      debug('yes!')
-      debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
-      if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
-        ctx.res.writeHead(200, {})
-        ctx.res.end(DATA_BROWSER_HTML)
-        ctx.respond = false
-      } else {
-        debug('LDP handler', ctx.req.method, ctx.req.url)
-        await this.wacLdp.handler(ctx.req, ctx.res)
-        ctx.respond = false
-      }
+      // debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
+      // if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
+      //   ctx.res.writeHead(200, {})
+      //   ctx.res.end(DATA_BROWSER_HTML)
+      //   ctx.respond = false
+      // } else {
+      debug('LDP handler', ctx.req.method, ctx.req.url)
+      await this.wacLdp.handler(ctx.req, ctx.res)
+      ctx.respond = false
+      // }
     })
     if (this.httpsConfig) {
       this.server = https.createServer(this.httpsConfig, this.app.callback())

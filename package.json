@@ -5,16 +5,20 @@
   "main": "dist/app.js",
   "dependencies": {
     "@types/debug": "^4.1.4",
+    "@types/koa": "^2.0.49",
+    "@types/koa-session": "^5.10.1",
+    "@types/koa-views": "^2.0.3",
     "@types/node": "^11.12.1",
     "@types/redis": "^2.8.12",
     "@types/ws": "^6.0.1",
     "buffer-to-stream": "^1.0.0",
     "debug": "^4.1.1",
     "koa": "^2.7.0",
+    "koa-session": "^5.12.2",
     "redis": "^2.8.0",
     "solid-idp": "^0.1.2",
-    "wac-ldp": "github:inrupt/wac-ldp#dev",
-    "websockets-pubsub": "github:inrupt/websockets-pubsub#dev",
+    "wac-ldp": "^0.6.0",
+    "websockets-pubsub": "^0.3.2",
     "ws": "^6.2.1"
   },
   "devDependencies": {
