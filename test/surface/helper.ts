@@ -3,12 +3,22 @@ import { BlobTreeInMem } from 'wac-ldp'
 
 let server: Server
 
+// interface OptionsObject {
+//   port: number
+//   rootDomain: string
+//   httpsConfig?: HttpsConfig
+//   storage: BlobTree
+//   keystore: any,
+//   useHttps: boolean
+// }
+
 export function startServer (port: number): Promise<void> {
   server = new Server({
-    storage: new BlobTreeInMem(),
     port,
-    aud: `http://localhost:${port}`,
-    owner: new URL('https://jackson.solid.community/profile/card#me')
+    rootDomain: `localhost:${port}`,
+    storage: new BlobTreeInMem(),
+    keystore: {},
+    useHttps: false
   })
   return server.listen()
 }
