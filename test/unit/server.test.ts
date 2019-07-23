@@ -1,5 +1,5 @@
 import { Server } from '../../src/server'
-import { BlobTreeInMem } from 'wac-ldp'
+import { BlobTreeInMem, QuadAndBlobStore } from 'wac-ldp'
 
 const PORT = 8082
 
@@ -18,7 +18,7 @@ test('server', async () => {
   server = new Server({
     port: PORT,
     rootDomain: `localhost:${PORT}`,
-    storage: new BlobTreeInMem(),
+    storage: new QuadAndBlobStore(new BlobTreeInMem()),
     keystore: {},
     useHttps: false
   })

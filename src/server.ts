@@ -2,7 +2,7 @@ import * as http from 'http'
 import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
-import { BlobTree, WacLdp } from 'wac-ldp'
+import { QuadAndBlobStore, WacLdp } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -27,13 +27,13 @@ interface OptionsObject {
   port: number
   rootDomain: string
   httpsConfig?: HttpsConfig
-  storage: BlobTree
+  storage: QuadAndBlobStore
   keystore: any,
   useHttps: boolean
 }
 
 export class Server {
-  storage: BlobTree
+  storage: QuadAndBlobStore
   server: http.Server | undefined
   hub: Hub | undefined
   port: number
@@ -54,8 +54,14 @@ export class Server {
     this.keystore = options.keystore
     this.rootOrigin = `http${(this.useHttps ? 's' : '')}://${this.rootDomain}`
     this.storage = options.storage
-    // FIXME: https://github.com/inrupt/wac-ldp/issues/87
-    this.wacLdp = new WacLdp(this.storage, this.rootDomain, this.webSocketUrl(), false /* skipWac */, options.rootDomain, true)
+    this.wacLdp = new WacLdp({
+      storage: this.storage,
+      aud: this.rootDomain,
+      updatesViaUrl: this.webSocketUrl(),
+      skipWac: false,
+      idpHost: options.rootDomain,
+      usesHttps: true
+    })
   }
   webSocketUrl () {
     return new URL(`ws${(this.useHttps ? 's' : '')}://${this.rootDomain}`)
