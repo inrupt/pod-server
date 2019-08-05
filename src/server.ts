@@ -2,6 +2,7 @@ import * as http from 'http'
 import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
+import path from 'path'
 import { QuadAndBlobStore, WacLdp } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
@@ -15,8 +16,8 @@ import getRootRenderRouter from './rootRender'
 
 const debug = Debug('server')
 
-const DATA_BROWSER_PREFIX = 'https://datasister.5apps.com/?idp='
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
+const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
 
 interface HttpsConfig {
   key: Buffer
@@ -70,7 +71,7 @@ export class Server {
     return storageRoot + (storageRoot.substr(-1) === '/' ? '' : '/') + 'profile/card#me'
   }
   screenNameToStorageRootStr (screenName: string) {
-    return `http${(this.useHttps ? 's' : '')}://${this.rootDomain}/${screenName}/`
+    return `http${(this.useHttps ? 's' : '')}://${screenName}.${this.rootDomain}`
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
@@ -95,28 +96,28 @@ export class Server {
     this.app.use(rootRenderRouter.routes())
     this.app.use(rootRenderRouter.allowedMethods())
 
-    this.app.use(async (ctx, next) => {
-      if (ctx.accepts(['text/turtle', 'application/ld+json', 'html']) === 'html') {
-        debug('redirect to data browser!')
-        ctx.res.writeHead(302, {
-          Location: DATA_BROWSER_PREFIX + encodeURIComponent(this.rootOrigin)
-        })
-        ctx.res.end('See ' + DATA_BROWSER_PREFIX + encodeURIComponent(this.rootOrigin))
-        ctx.respond = false
-      } else {
-        await next()
-      }
-    })
-
     // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
     const loginRouter = new Router()
     loginRouter.get('/.well-known/solid/login', (ctx, next) => {
+      debug('sending login html')
       ctx.res.writeHead(200, {})
       ctx.res.end(LOGIN_HTML)
       ctx.respond = false
     })
     this.app.use(loginRouter.routes())
     this.app.use(loginRouter.allowedMethods())
+
+    // Data Browser
+    this.app.use(async (ctx, next) => {
+      if (ctx.accepts(['text/turtle', 'application/ld+json', 'html']) === 'html') {
+        debug('redirect to data browser!')
+        ctx.res.writeHead(200, {})
+        ctx.res.end(DATA_BROWSER_HTML)
+      } else {
+        debug('skipping data browser')
+        await next()
+      }
+    })
     // END HACK
 
     this.app.use(async (ctx, next) => {
