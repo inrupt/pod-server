@@ -1,7 +1,7 @@
 import { Server } from './server'
 import { BlobTreeRedis } from './BlobTreeRedis'
 import * as fs from 'fs'
-import { BlobTreeInMem, QuadAndBlobStore } from 'wac-ldp'
+import { BlobTreeInMem, BufferTree } from 'wac-ldp'
 import Debug from 'debug'
 
 const debug = Debug('standalone')
@@ -29,13 +29,13 @@ if (!ownerStr) {
   ownerStr = 'https://jackson.solid.community/profile/card#me'
 }
 
-let storage: QuadAndBlobStore
+let storage: BufferTree
 if (process.env.REDIS_URL) {
   debug('using redis backend')
-  storage = new QuadAndBlobStore(new BlobTreeRedis(process.env.REDIS_URL))
+  storage = new BufferTree(new BlobTreeRedis(process.env.REDIS_URL))
 } else {
   debug('using in-memory backend')
-  storage = new QuadAndBlobStore(new BlobTreeInMem())
+  storage = new BufferTree(new BlobTreeInMem())
 }
 
 let keystore: any

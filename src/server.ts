@@ -3,7 +3,7 @@ import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
 import path from 'path'
-import { QuadAndBlobStore, WacLdp } from 'wac-ldp'
+import { BlobTree, WacLdp } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -28,13 +28,13 @@ interface OptionsObject {
   port: number
   rootDomain: string
   httpsConfig?: HttpsConfig
-  storage: QuadAndBlobStore
+  storage: BlobTree
   keystore: any,
   useHttps: boolean
 }
 
 export class Server {
-  storage: QuadAndBlobStore
+  storage: BlobTree
   server: http.Server | undefined
   hub: Hub | undefined
   port: number
