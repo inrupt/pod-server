@@ -3,7 +3,7 @@ import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
 import path from 'path'
-import { BlobTree, WacLdp } from 'wac-ldp'
+import { BlobTree, WacLdp, WacLdpOptions, QuadAndBlobStore } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -56,13 +56,13 @@ export class Server {
     this.rootOrigin = `http${(this.useHttps ? 's' : '')}://${this.rootDomain}`
     this.storage = options.storage
     this.wacLdp = new WacLdp({
-      storage: this.storage,
+      storage: new QuadAndBlobStore(this.storage),
       aud: this.rootDomain,
       updatesViaUrl: this.webSocketUrl(),
       skipWac: false,
       idpHost: options.rootDomain,
       usesHttps: true
-    })
+    } as WacLdpOptions)
   }
   webSocketUrl () {
     return new URL(`ws${(this.useHttps ? 's' : '')}://${this.rootDomain}`)

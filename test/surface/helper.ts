@@ -1,5 +1,5 @@
 import { Server } from '../../src/server'
-import { BlobTreeInMem, BufferTree } from 'wac-ldp'
+import { BlobTreeInMem, QuadAndBlobStore } from 'wac-ldp'
 
 let server: Server
 
@@ -16,7 +16,7 @@ export function startServer (port: number): Promise<void> {
   server = new Server({
     port,
     rootDomain: `localhost:${port}`,
-    storage:  new BufferTree(new BlobTreeInMem()),
+    storage:  new BlobTreeInMem(),
     keystore: {},
     useHttps: false
   })
