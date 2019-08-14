@@ -1,5 +1,4 @@
 import { Server } from './server'
-import { BlobTreeRedis } from './BlobTreeRedis'
 import * as fs from 'fs'
 import { BlobTreeNssCompat, BlobTree } from 'wac-ldp'
 import Debug from 'debug'
