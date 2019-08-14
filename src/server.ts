@@ -71,7 +71,10 @@ export class Server {
     return storageRoot + (storageRoot.substr(-1) === '/' ? '' : '/') + 'profile/card#me'
   }
   screenNameToStorageRootStr (screenName: string) {
-    return `http${(this.useHttps ? 's' : '')}://${screenName}.${this.rootDomain}`
+    const defaultPort: Number = (this.useHttps ? 443 : 80)
+    const portIsDefault: boolean = (this.port === defaultPort)
+    const portSuffix: string = (portIsDefault ? '' : `:${this.port}`)
+    return `http${(this.useHttps ? 's' : '')}://${screenName}.${this.rootDomain}${portSuffix}`
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
@@ -86,7 +89,7 @@ export class Server {
     this.app.keys = [ 'REPLACE_THIS_LATER' ]
     this.app.use(session(this.app))
     this.app.use(async (ctx, next) => {
-      ctx.req.headers['x-forwarded-proto'] = 'https'
+      ctx.req.headers['x-forwarded-proto'] = `http${this.useHttps ? 's' : ''}`
       await next()
     })
 
