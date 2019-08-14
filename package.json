@@ -1,6 +1,6 @@
 {
   "name": "pod-server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Solid pod server, composed from various independent TypeScript modules.",
   "main": "dist/app.js",
   "dependencies": {
@@ -16,9 +16,9 @@
     "koa": "^2.7.0",
     "koa-session": "^5.12.2",
     "redis": "^2.8.0",
-    "solid-idp": "^0.1.2",
-    "wac-ldp": "^0.6.0",
-    "websockets-pubsub": "^0.3.2",
+    "solid-idp": "github:inrupt/solid-idp#dev",
+    "wac-ldp": "^0.7.0",
+    "websockets-pubsub": "^0.3.3",
     "ws": "^6.2.1"
   },
   "devDependencies": {
