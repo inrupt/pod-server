@@ -77,9 +77,10 @@ export class Server {
     debug('setting IDP issuer to', this.rootDomain)
     this.idpRouter = await defaultConfiguration({
       issuer: this.rootOrigin,
-      pathPrefix: ''
+      pathPrefix: '',
+      webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
+      keystore: this.keystore
     })
-
     this.app = new Koa()
     this.app.proxy = true
     this.app.keys = [ 'REPLACE_THIS_LATER' ]
