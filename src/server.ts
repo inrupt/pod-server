@@ -40,7 +40,7 @@ export class Server {
   port: number
   wsServer: any
   app: Koa | undefined
-  idpRouter: any
+  // idpRouter: any
   rootDomain: string
   rootOrigin: string
   wacLdp: WacLdp
@@ -57,10 +57,10 @@ export class Server {
     this.storage = options.storage
     this.wacLdp = new WacLdp({
       storage: new QuadAndBlobStore(this.storage),
-      aud: this.rootDomain,
+      aud: this.rootOrigin,
       updatesViaUrl: this.webSocketUrl(),
       skipWac: false,
-      idpHost: options.rootDomain,
+      // idpHost: options.rootDomain,
       usesHttps: true
     } as WacLdpOptions)
   }
@@ -80,12 +80,12 @@ export class Server {
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
-    this.idpRouter = await defaultConfiguration({
-      issuer: this.rootOrigin,
-      pathPrefix: '',
-      webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
-      keystore: this.keystore
-    })
+    // this.idpRouter = await defaultConfiguration({
+    //   issuer: this.rootOrigin,
+    //   pathPrefix: '',
+    //   webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
+    //   keystore: this.keystore
+    // })
     this.app = new Koa()
     this.app.proxy = true
     this.app.keys = [ 'REPLACE_THIS_LATER' ]
@@ -95,8 +95,8 @@ export class Server {
       await next()
     })
 
-    this.app.use(this.idpRouter.routes())
-    this.app.use(this.idpRouter.allowedMethods())
+    // this.app.use(this.idpRouter.routes())
+    // this.app.use(this.idpRouter.allowedMethods())
 
     const rootRenderRouter = getRootRenderRouter(this.rootOrigin)
     this.app.use(rootRenderRouter.routes())

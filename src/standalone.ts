@@ -5,38 +5,45 @@ import Debug from 'debug'
 
 const debug = Debug('standalone')
 
-// on startup:
-const port = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 8080
+const config = JSON.parse(
+  (process.env.CONFIG_PATH ? fs.readFileSync(process.env.CONFIG_PATH) : fs.readFileSync('./config.json')).toString()
+)
 
-const rootDomain = process.env.ROOT_DOMAIN || `localhost:${port}`
+console.log(config)
+
+// on startup:
+const port = parseInt((config.network.port ? config.network.port : ''), 10) || 8080
+
+const rootDomain = config.network.host || `localhost:${port}`
 
 const skipWac: boolean = !!process.env.SKIP_WAC
 
 const tlsDir = process.env.TLS_DIR
 let httpsConfig
-if (tlsDir) {
+if (config.network.ssl) {
   httpsConfig = {
-    key: fs.readFileSync(`${tlsDir}/privkey.pem`),
-    cert: fs.readFileSync(`${tlsDir}/fullchain.pem`)
+    key: fs.readFileSync(config.network.ssl.key),
+    cert: fs.readFileSync(config.network.ssl.cert)
   }
 }
-const useHttps = process.env.USE_HTTPS === 'true' || !!tlsDir
+const useHttps = !!config.network.ssl
 
-let ownerStr: string | undefined = process.env.OWNER
-if (!ownerStr) {
-  // throw new Error('OWNER environment variable required')
-  ownerStr = 'https://jackson.solid.community/profile/card#me'
-}
+// TODO: come back to allow configs to have multi user mode
+// let ownerStr: string | undefined = process.env.OWNER
+// if (!ownerStr) {
+//   // throw new Error('OWNER environment variable required')
+//   ownerStr = 'https://jackson.solid.community/profile/card#me'
+// }
 
 let storage: BlobTree
 storage = new BlobTreeNssCompat(process.env.DATA_DIR || './data-dir/')
 
 let keystore: any
-if (process.env.KEY_STORE) {
+if (config.identityProvider.keystore) {
   try {
-    keystore = JSON.parse(fs.readFileSync(process.env.KEY_STORE).toString())
+    keystore = JSON.parse(fs.readFileSync(config.identityProvider.keystore).toString())
   } catch (e) {
-    console.error('failed to read IDP keystore from ', process.env.KEY_STORE)
+    console.error('failed to read IDP keystore from ', config.identityProvider.keystore)
   }
 }
 
