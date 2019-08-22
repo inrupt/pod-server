@@ -17,7 +17,7 @@
     "koa-session": "^5.12.2",
     "redis": "^2.8.0",
     "solid-idp": "github:inrupt/solid-idp#dev",
-    "wac-ldp": "^0.7.0",
+    "wac-ldp": "github:inrupt/wac-ldp#dev",
     "websockets-pubsub": "^0.3.3",
     "ws": "^6.2.1"
   },
