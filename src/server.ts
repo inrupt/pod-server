@@ -17,7 +17,9 @@ import getRootRenderRouter from './rootRender'
 const debug = Debug('server')
 
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
-const DATA_BROWSER_HTML = fs.readFileSync('./static/index.html')
+const DATA_BROWSER_HTML = fs.readFileSync(path.join(__dirname, '../node_modules/mashlib/dist/index.html'))
+const DATA_BROWSER_CSS = fs.readFileSync(path.join(__dirname, '../node_modules/mashlib/dist/mash.css'))
+const DATA_BROWSER_JS = fs.readFileSync(path.join(__dirname, '../node_modules/mashlib/dist/mashlib.min.js'))
 
 interface HttpsConfig {
   key: Buffer
@@ -31,6 +33,8 @@ interface OptionsObject {
   storage: BlobTree
   keystore: any,
   useHttps: boolean
+  mailConfiguration: any
+  idpStorage: any
 }
 
 export class Server {
@@ -40,13 +44,15 @@ export class Server {
   port: number
   wsServer: any
   app: Koa | undefined
-  // idpRouter: any
+  idpRouter: any
   rootDomain: string
   rootOrigin: string
   wacLdp: WacLdp
   httpsConfig: HttpsConfig | undefined
   useHttps: boolean
   keystore: any
+  mailConfiguration: any
+  idpStorage: any
   constructor (options: OptionsObject) {
     this.port = options.port
     this.rootDomain = options.rootDomain
@@ -60,9 +66,11 @@ export class Server {
       aud: this.rootOrigin,
       updatesViaUrl: this.webSocketUrl(),
       skipWac: false,
-      // idpHost: options.rootDomain,
+      idpHost: options.rootDomain,
       usesHttps: true
     } as WacLdpOptions)
+    this.mailConfiguration = options.mailConfiguration
+    this.idpStorage = options.idpStorage
   }
   webSocketUrl () {
     return new URL(`ws${(this.useHttps ? 's' : '')}://${this.rootDomain}`)
@@ -80,12 +88,17 @@ export class Server {
   }
   async listen () {
     debug('setting IDP issuer to', this.rootDomain)
-    // this.idpRouter = await defaultConfiguration({
-    //   issuer: this.rootOrigin,
-    //   pathPrefix: '',
-    //   webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
-    //   keystore: this.keystore
-    // })
+    this.idpRouter = await defaultConfiguration({
+      issuer: this.rootOrigin,
+      pathPrefix: '',
+      mailConfiguration: this.mailConfiguration,
+      webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
+      keystore: this.keystore,
+      storagePreset: 'filesystem',
+      storageData: {
+        folder: this.idpStorage.rootFolder
+      }
+    })
     this.app = new Koa()
     this.app.proxy = true
     this.app.keys = [ 'REPLACE_THIS_LATER' ]
@@ -95,12 +108,20 @@ export class Server {
       await next()
     })
 
-    // this.app.use(this.idpRouter.routes())
-    // this.app.use(this.idpRouter.allowedMethods())
-
     const rootRenderRouter = getRootRenderRouter(this.rootOrigin)
     this.app.use(rootRenderRouter.routes())
     this.app.use(rootRenderRouter.allowedMethods())
+
+    // TODO: this way of handling the if statement is ugly
+    this.app.use(async (ctx, next) => {
+      if (ctx.origin === this.rootOrigin) {
+        await this.idpRouter.routes()(ctx, async () => {
+          await this.idpRouter.allowedMethods()(ctx, next)
+        })
+      } else {
+        await next()
+      }
+    })
 
     // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
     const loginRouter = new Router()
@@ -114,6 +135,17 @@ export class Server {
     this.app.use(loginRouter.allowedMethods())
 
     // Data Browser
+    const dataBrowserFilesRouter = new Router()
+    dataBrowserFilesRouter.get('/mash.css', (ctx, next) => {
+      ctx.res.writeHead(200, {})
+      ctx.res.end(DATA_BROWSER_CSS)
+    })
+    dataBrowserFilesRouter.get('/mashlib.min.js', (ctx, next) => {
+      ctx.res.writeHead(200, {})
+      ctx.res.end(DATA_BROWSER_JS)
+    })
+    this.app.use(dataBrowserFilesRouter.routes())
+    this.app.use(dataBrowserFilesRouter.allowedMethods())
     this.app.use(async (ctx, next) => {
       if (ctx.accepts(['text/turtle', 'application/ld+json', 'html']) === 'html') {
         debug('redirect to data browser!')
@@ -127,16 +159,9 @@ export class Server {
     // END HACK
 
     this.app.use(async (ctx, next) => {
-      // debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
-      // if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
-      //   ctx.res.writeHead(200, {})
-      //   ctx.res.end(DATA_BROWSER_HTML)
-      //   ctx.respond = false
-      // } else {
       debug('LDP handler', ctx.req.method, ctx.req.url)
       await this.wacLdp.handler(ctx.req, ctx.res)
       ctx.respond = false
-      // }
     })
     if (this.httpsConfig) {
       this.server = https.createServer(this.httpsConfig, this.app.callback())

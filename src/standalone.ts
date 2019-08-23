@@ -26,7 +26,7 @@ if (config.network.ssl) {
     cert: fs.readFileSync(config.network.ssl.cert)
   }
 }
-const useHttps = !!config.network.ssl
+const useHttps = config.network.useHttps || !!config.network.ssl
 
 // TODO: come back to allow configs to have multi user mode
 // let ownerStr: string | undefined = process.env.OWNER
@@ -36,7 +36,7 @@ const useHttps = !!config.network.ssl
 // }
 
 let storage: BlobTree
-storage = new BlobTreeNssCompat(process.env.DATA_DIR || './data-dir/')
+storage = new BlobTreeNssCompat(config.storage.rootFolder || './data-dir/')
 
 let keystore: any
 if (config.identityProvider.keystore) {
@@ -53,7 +53,9 @@ const server = new Server({
   httpsConfig,
   storage,
   keystore,
-  useHttps
+  useHttps,
+  mailConfiguration: config.identityProvider.email,
+  idpStorage: config.identityProvider.storage
 })
 
 async function startServer () {
