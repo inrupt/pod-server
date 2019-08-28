@@ -93,6 +93,13 @@ export class Server {
       pathPrefix: '',
       mailConfiguration: this.mailConfiguration,
       webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
+      onNewUser: async (screenName: string) => {
+        debug('new user', screenName)
+        const storageRootStr = this.screenNameToStorageRootStr(screenName)
+        const webIdStr = this.storageRootStrToWebIdStr(storageRootStr)
+        await provisionStorage(this.wacLdp, new URL(storageRootStr), new URL(webIdStr))
+        return webIdStr
+      },
       keystore: this.keystore,
       storagePreset: 'filesystem',
       storageData: {
