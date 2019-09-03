@@ -72,7 +72,7 @@ export class Server {
     this.resourceStore = new NssCompatResourceStore()
     this.operationFactory = new DefaultOperationFactory(this.resourceStore)
     this.authorizer = new AclBasedAuthorizer(this.resourceStore)
-    this.wacLdp = new WacLdp(/* this.operationFactory, this.authorizer, */ {
+    this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
       storage: new QuadAndBlobStore(this.storage),
       aud: this.rootOrigin,
       updatesViaUrl: this.webSocketUrl(),
