@@ -3,7 +3,7 @@ import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
 import path from 'path'
-import { BlobTree, WacLdp, WacLdpOptions, QuadAndBlobStore } from 'wac-ldp'
+import { BlobTree, WacLdp, WacLdpOptions, QuadAndBlobStore, NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -16,6 +16,7 @@ import getRootRenderRouter from './rootRender'
 
 import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
+import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
 import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
 
 const debug = Debug('server')
@@ -42,6 +43,9 @@ interface OptionsObject {
 }
 
 export class Server {
+  resourceStore: IResourceStore
+  operationFactory: IOperationFactory
+  authorizer: IAuthorizer
   storage: BlobTree
   server: http.Server | undefined
   hub: Hub | undefined
@@ -51,7 +55,7 @@ export class Server {
   idpRouter: any
   rootDomain: string
   rootOrigin: string
-  wacLdp: WacLdp
+  wacLdp: IHttpHandler
   httpsConfig: HttpsConfig | undefined
   useHttps: boolean
   keystore: any
@@ -65,7 +69,10 @@ export class Server {
     this.keystore = options.keystore
     this.rootOrigin = `http${(this.useHttps ? 's' : '')}://${this.rootDomain}`
     this.storage = options.storage
-    this.wacLdp = new WacLdp({
+    this.resourceStore = new NssCompatResourceStore()
+    this.operationFactory = new DefaultOperationFactory(this.resourceStore)
+    this.authorizer = new AclBasedAuthorizer(this.resourceStore)
+    this.wacLdp = new WacLdp(/* this.operationFactory, this.authorizer, */ {
       storage: new QuadAndBlobStore(this.storage),
       aud: this.rootOrigin,
       updatesViaUrl: this.webSocketUrl(),
@@ -101,7 +108,7 @@ export class Server {
         debug('new user', screenName)
         const storageRootStr = this.screenNameToStorageRootStr(screenName)
         const webIdStr = this.storageRootStrToWebIdStr(storageRootStr)
-        await provisionStorage(this.wacLdp, new URL(storageRootStr), new URL(webIdStr))
+        await provisionStorage(this.wacLdp as WacLdp, new URL(storageRootStr), new URL(webIdStr))
         return webIdStr
       },
       keystore: this.keystore,
@@ -171,7 +178,7 @@ export class Server {
 
     this.app.use(async (ctx, next) => {
       debug('LDP handler', ctx.req.method, ctx.req.url)
-      await this.wacLdp.handler(ctx.req, ctx.res)
+      await this.wacLdp.handle(ctx.req, ctx.res)
       ctx.respond = false
     })
     if (this.httpsConfig) {
@@ -183,9 +190,9 @@ export class Server {
     this.wsServer = new WebSocket.Server({
       server: this.server
     })
-    this.hub = new Hub(this.wacLdp, this.rootOrigin)
+    this.hub = new Hub(this.wacLdp as WacLdp, this.rootOrigin)
     this.wsServer.on('connection', this.hub.handleConnection.bind(this.hub))
-    this.wacLdp.on('change', (event: { url: URL }) => {
+    ;(this.wacLdp as WacLdp).on('change', (event: { url: URL }) => {
       if (this.hub) {
         this.hub.publishChange(event.url)
       }
