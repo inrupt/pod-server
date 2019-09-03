@@ -14,6 +14,10 @@ import { defaultConfiguration } from 'solid-idp'
 import getRootRenderRouter from './rootRender'
 // import { default as Accepts } from 'accepts'
 
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
+import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
+
 const debug = Debug('server')
 
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
