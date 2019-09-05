@@ -1,0 +1,26 @@
+{
+  "storage": {
+    "type": "filesystem",
+    "rootFolder": "./data"
+  },
+  "network": {
+    "host": "server",
+    "port": 8080,
+    "useHttps": false
+  },
+  "htmlRenderer": "mashlib",
+  "allowProvisioningExternalIdentites": false,
+  "routing": {
+    "routingStrategy": "subdomain",
+    "pathPrefix": ""
+  },
+  "allowExternalDomains": false,
+  "identityProvider": {
+    "enabled": true,
+    "storage": {
+      "type": "filesystem",
+      "rootFolder": "./.db"
+    },
+    "keystore": "/home/jackson/pod-server/sample-keystore.json"
+  }
+}
