@@ -12,6 +12,8 @@ let server: Server
 //   storage: BlobTree
 //   keystore: any,
 //   useHttps: boolean
+//   mailConfiguration: any
+//   idpStorage: any
 // }
 
 test('server', async () => {
@@ -20,7 +22,12 @@ test('server', async () => {
     rootDomain: `localhost:${PORT}`,
     storage: new BlobTreeInMem(),
     keystore: {},
-    useHttps: false
+    useHttps: false,
+    mailConfiguration: undefined,
+    idpStorage:  {
+      type: 'filesystem',
+      rootFolder: './.db'
+    }
   })
   await server.listen()
   server.close()

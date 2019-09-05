@@ -98,7 +98,7 @@ export class Server {
     return `http${(this.useHttps ? 's' : '')}://${screenName}.${this.rootDomain}`
   }
   async listen () {
-    debug('setting IDP issuer to', this.rootDomain)
+    debug('setting IDP issuer to', this.rootOrigin)
     this.idpRouter = await defaultConfiguration({
       issuer: this.rootOrigin,
       pathPrefix: '',

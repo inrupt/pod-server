@@ -10,6 +10,8 @@ let server: Server
 //   storage: BlobTree
 //   keystore: any,
 //   useHttps: boolean
+//   mailConfiguration: any
+//   idpStorage: any
 // }
 
 export function startServer (port: number): Promise<void> {
@@ -18,7 +20,12 @@ export function startServer (port: number): Promise<void> {
     rootDomain: `localhost:${port}`,
     storage:  new BlobTreeInMem(),
     keystore: {},
-    useHttps: false
+    useHttps: false,
+    mailConfiguration: undefined,
+    idpStorage: {
+      type: 'filesystem',
+      rootFolder: ''
+    }
   })
   return server.listen()
 }
