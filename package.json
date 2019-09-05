@@ -1,6 +1,6 @@
 {
   "name": "pod-server",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Solid pod server, composed from various independent TypeScript modules.",
   "main": "dist/app.js",
   "dependencies": {
