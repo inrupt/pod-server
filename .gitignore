@@ -63,6 +63,8 @@ typings/
 
 # dotenv environment variables file
 .env
+config.json
+data
 
 # next.js build output
 .next
@@ -70,3 +72,7 @@ typings/
 # IDEs
 .idea
 .vscode
+
+
+.db
+data

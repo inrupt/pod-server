@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome to Solid</title>
+</head>
+<body>
+<script src="https://inrupt.net/common/js/solid-auth-client.bundle.js"></script>
+<script>
+/* Provide functionality for authentication buttons */
+(({ auth }) => {
+  // Track authentication status
+  auth.trackSession(session => {
+    const loggedIn = !!session
+    const isOwner = loggedIn && new URL(session.webId).origin === location.origin
+    if (!loggedIn) {
+      auth.login('<%= rootOrigin %>')
+    } else {
+      window.location.replace(new URL(session.webId).origin)
+    }
+  })
+})(solid)
+</script>
+</body>
+</html>
