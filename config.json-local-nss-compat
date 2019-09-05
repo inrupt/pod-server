@@ -4,7 +4,7 @@
     "rootFolder": "./data"
   },
   "network": {
-    "host": "server",
+    "host": "localhost:8080",
     "port": 8080,
     "useHttps": false
   },
@@ -21,6 +21,6 @@
       "type": "filesystem",
       "rootFolder": "./.db"
     },
-    "keystore": "/home/jackson/pod-server/sample-keystore.json"
+    "keystore": "./sample-keystore.json"
   }
 }
