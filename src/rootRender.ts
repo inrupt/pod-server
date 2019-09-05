@@ -6,8 +6,6 @@ export default function getRootRenderRouter (rootOrigin: any): Router {
   const router = new Router()
   router.all('/', views(path.join(__dirname, 'views'), { extension: 'ejs' }))
   router.use(async (ctx, next) => {
-    console.log('ORIGIN!!!!!!!!!!!!!!!!!!')
-    console.log(ctx.origin)
     if (ctx.path === '/' && ctx.origin === rootOrigin) {
       return ctx.render('home', {
         rootOrigin
