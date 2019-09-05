@@ -287,6 +287,7 @@ declare module 'oidc-provider' {
         // TODO What does the client_credientials configuration look like (not listed here yet but referenced in documentation)
         jwtAccessTokenSigningAlg?: (ctx: Context, token: string, client: Client) => SigningAlgValue
         AccessToken?: 'jwt' | 'opaque' | 'paseto' | ((ctx: Context, token: string) => 'jwt' | 'opaque')
+        default?: 'jwt' | 'opaque' | 'paseto' | ((ctx: Context, token: string) => 'jwt' | 'opaque')
       }
       httpsOptions?: (options: GotOptions<string>) => GotOptions<string>
       interactions?: {
