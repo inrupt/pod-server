@@ -2,7 +2,8 @@ import * as http from 'http'
 import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
-import { BlobTree, WacLdp } from 'wac-ldp'
+import path from 'path'
+import { BlobTree, WacLdp, WacLdpOptions, QuadAndBlobStore, NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -13,10 +14,17 @@ import { defaultConfiguration } from 'solid-idp'
 import getRootRenderRouter from './rootRender'
 // import { default as Accepts } from 'accepts'
 
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
+import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
+
 const debug = Debug('server')
 
-const DATA_BROWSER_PREFIX = 'https://datasister.5apps.com/?idp='
 const LOGIN_HTML = fs.readFileSync('./static/popup.html')
+const DATA_BROWSER_HTML = fs.readFileSync(path.join(__dirname, '../node_modules/mashlib/dist/index.html'))
+const DATA_BROWSER_CSS = fs.readFileSync(path.join(__dirname, '../node_modules/mashlib/dist/mash.css'))
+const DATA_BROWSER_JS = fs.readFileSync(path.join(__dirname, '../node_modules/mashlib/dist/mashlib.min.js'))
 
 interface HttpsConfig {
   key: Buffer
@@ -30,9 +38,14 @@ interface OptionsObject {
   storage: BlobTree
   keystore: any,
   useHttps: boolean
+  mailConfiguration: any
+  idpStorage: any
 }
 
 export class Server {
+  resourceStore: IResourceStore
+  operationFactory: IOperationFactory
+  authorizer: IAuthorizer
   storage: BlobTree
   server: http.Server | undefined
   hub: Hub | undefined
@@ -42,10 +55,12 @@ export class Server {
   idpRouter: any
   rootDomain: string
   rootOrigin: string
-  wacLdp: WacLdp
+  wacLdp: IHttpHandler
   httpsConfig: HttpsConfig | undefined
   useHttps: boolean
   keystore: any
+  mailConfiguration: any
+  idpStorage: any
   constructor (options: OptionsObject) {
     this.port = options.port
     this.rootDomain = options.rootDomain
@@ -54,8 +69,19 @@ export class Server {
     this.keystore = options.keystore
     this.rootOrigin = `http${(this.useHttps ? 's' : '')}://${this.rootDomain}`
     this.storage = options.storage
-    // FIXME: https://github.com/inrupt/wac-ldp/issues/87
-    this.wacLdp = new WacLdp(this.storage, this.rootDomain, this.webSocketUrl(), false /* skipWac */, options.rootDomain, true)
+    this.resourceStore = new NssCompatResourceStore()
+    this.operationFactory = new DefaultOperationFactory(this.resourceStore)
+    this.authorizer = new AclBasedAuthorizer(this.resourceStore)
+    this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
+      storage: new QuadAndBlobStore(this.storage),
+      aud: this.rootOrigin,
+      updatesViaUrl: this.webSocketUrl(),
+      skipWac: false,
+      idpHost: options.rootDomain,
+      usesHttps: true
+    } as WacLdpOptions)
+    this.mailConfiguration = options.mailConfiguration
+    this.idpStorage = options.idpStorage
   }
   webSocketUrl () {
     return new URL(`ws${(this.useHttps ? 's' : '')}://${this.rootDomain}`)
@@ -64,39 +90,52 @@ export class Server {
     return storageRoot + (storageRoot.substr(-1) === '/' ? '' : '/') + 'profile/card#me'
   }
   screenNameToStorageRootStr (screenName: string) {
-    return `http${(this.useHttps ? 's' : '')}://${this.rootDomain}/${screenName}/`
+    // no need to append portSuffix here since it's already part of this.rootDomain
+    // const defaultPort: Number = (this.useHttps ? 443 : 80)
+    // const portIsDefault: boolean = (this.port === defaultPort)
+    // const portSuffix: string = (portIsDefault ? '' : `:${this.port}`)
+    // return `http${(this.useHttps ? 's' : '')}://${screenName}.${this.rootDomain}${portSuffix}`
+    return `http${(this.useHttps ? 's' : '')}://${screenName}.${this.rootDomain}`
   }
   async listen () {
-    debug('setting IDP issuer to', this.rootDomain)
+    debug('setting IDP issuer to', this.rootOrigin)
     this.idpRouter = await defaultConfiguration({
       issuer: this.rootOrigin,
-      pathPrefix: ''
+      pathPrefix: '',
+      mailConfiguration: this.mailConfiguration,
+      webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
+      onNewUser: async (screenName: string) => {
+        debug('new user', screenName)
+        const storageRootStr = this.screenNameToStorageRootStr(screenName)
+        const webIdStr = this.storageRootStrToWebIdStr(storageRootStr)
+        await provisionStorage(this.wacLdp as WacLdp, new URL(storageRootStr), new URL(webIdStr))
+        return webIdStr
+      },
+      keystore: this.keystore,
+      storagePreset: 'filesystem',
+      storageData: {
+        folder: this.idpStorage.rootFolder
+      }
     })
-
     this.app = new Koa()
     this.app.proxy = true
     this.app.keys = [ 'REPLACE_THIS_LATER' ]
     this.app.use(session(this.app))
     this.app.use(async (ctx, next) => {
-      ctx.req.headers['x-forwarded-proto'] = 'https'
+      ctx.req.headers['x-forwarded-proto'] = `http${this.useHttps ? 's' : ''}`
       await next()
     })
-
-    this.app.use(this.idpRouter.routes())
-    this.app.use(this.idpRouter.allowedMethods())
 
     const rootRenderRouter = getRootRenderRouter(this.rootOrigin)
     this.app.use(rootRenderRouter.routes())
     this.app.use(rootRenderRouter.allowedMethods())
 
+    // TODO: this way of handling the if statement is ugly
     this.app.use(async (ctx, next) => {
-      if (ctx.accepts(['text/turtle', 'application/ld+json', 'html']) === 'html') {
-        debug('redirect to data browser!')
-        ctx.res.writeHead(302, {
-          Location: DATA_BROWSER_PREFIX + encodeURIComponent(this.rootOrigin)
+      if (ctx.origin === this.rootOrigin) {
+        await this.idpRouter.routes()(ctx, async () => {
+          await this.idpRouter.allowedMethods()(ctx, next)
         })
-        ctx.res.end('See ' + DATA_BROWSER_PREFIX + encodeURIComponent(this.rootOrigin))
-        ctx.respond = false
       } else {
         await next()
       }
@@ -105,25 +144,42 @@ export class Server {
     // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
     const loginRouter = new Router()
     loginRouter.get('/.well-known/solid/login', (ctx, next) => {
+      debug('sending login html')
       ctx.res.writeHead(200, {})
       ctx.res.end(LOGIN_HTML)
       ctx.respond = false
     })
     this.app.use(loginRouter.routes())
     this.app.use(loginRouter.allowedMethods())
+
+    // Data Browser
+    const dataBrowserFilesRouter = new Router()
+    dataBrowserFilesRouter.get('/mash.css', (ctx, next) => {
+      ctx.res.writeHead(200, {})
+      ctx.res.end(DATA_BROWSER_CSS)
+    })
+    dataBrowserFilesRouter.get('/mashlib.min.js', (ctx, next) => {
+      ctx.res.writeHead(200, {})
+      ctx.res.end(DATA_BROWSER_JS)
+    })
+    this.app.use(dataBrowserFilesRouter.routes())
+    this.app.use(dataBrowserFilesRouter.allowedMethods())
+    this.app.use(async (ctx, next) => {
+      if (ctx.accepts(['text/turtle', 'application/ld+json', 'html']) === 'html') {
+        debug('redirect to data browser!')
+        ctx.res.writeHead(200, {})
+        ctx.res.end(DATA_BROWSER_HTML)
+      } else {
+        debug('skipping data browser')
+        await next()
+      }
+    })
     // END HACK
 
     this.app.use(async (ctx, next) => {
-      // debug(ctx.req.headers, ctx.req.headers['accept'] && ctx.req.headers['accept'].indexOf('text/html'))
-      // if ((ctx.req.headers['accept']) && (ctx.req.headers['accept'].indexOf('text/html') !== -1)) {
-      //   ctx.res.writeHead(200, {})
-      //   ctx.res.end(DATA_BROWSER_HTML)
-      //   ctx.respond = false
-      // } else {
       debug('LDP handler', ctx.req.method, ctx.req.url)
-      await this.wacLdp.handler(ctx.req, ctx.res)
+      await this.wacLdp.handle(ctx.req, ctx.res)
       ctx.respond = false
-      // }
     })
     if (this.httpsConfig) {
       this.server = https.createServer(this.httpsConfig, this.app.callback())
@@ -134,9 +190,9 @@ export class Server {
     this.wsServer = new WebSocket.Server({
       server: this.server
     })
-    this.hub = new Hub(this.wacLdp, this.rootOrigin)
+    this.hub = new Hub(this.wacLdp as WacLdp, this.rootOrigin)
     this.wsServer.on('connection', this.hub.handleConnection.bind(this.hub))
-    this.wacLdp.on('change', (event: { url: URL }) => {
+    ;(this.wacLdp as WacLdp).on('change', (event: { url: URL }) => {
       if (this.hub) {
         this.hub.publishChange(event.url)
       }

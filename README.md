@@ -12,6 +12,19 @@ Solid server package that bind together
 [websockets-pubsub](https://github.com/inrupt/websockets-pubsub), and the
 [data-browser](https://github.com/linkeddata/mashlib).
 
+# Running on localhost, NSS compat mode
+
+```sh
+git clone https://github.com/inrupt/pod-server
+cd pod-server
+git checkout dev
+npm install
+cp config.json-local-nss-compat config.json
+cp -r ../../solid/node-solid-server/.db .
+cp -r ../../solid/node-solid-server/data .
+npm start
+```
+
 # Architecture
 
 ## The Solid Spec Protocols
