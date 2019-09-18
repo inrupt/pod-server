@@ -19,7 +19,7 @@
     "koa-static-server": "^1.4.0",
     "mashlib": "^1.0.0",
     "redis": "^2.8.0",
-    "solid-idp": "^0.1.5",
+    "solid-idp": "0.1.5-build2",
     "solid-server-ts": "github:inrupt/solid-server-ts#dev",
     "wac-ldp": "^0.8.0",
     "websockets-pubsub": "^0.3.4",
