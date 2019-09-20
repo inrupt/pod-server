@@ -23,7 +23,7 @@ cp config.json-local-nss-compat config.json
 cp -r ../../solid/node-solid-server/.db .
 cp -r ../../solid/node-solid-server/data .
 npm run build
-npm start
+DEBUG=* npm start
 ```
 
 # Architecture
