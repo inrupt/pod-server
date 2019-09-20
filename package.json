@@ -19,7 +19,7 @@
     "koa-static-server": "^1.4.0",
     "mashlib": "^1.0.0",
     "redis": "^2.8.0",
-    "solid-idp": "^0.1.5",
+    "solid-idp": "0.1.5-build3",
     "solid-server-ts": "github:inrupt/solid-server-ts#dev",
     "wac-ldp": "^0.8.0",
     "websockets-pubsub": "^0.3.4",
@@ -28,6 +28,7 @@
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/mockdate": "^2.0.0",
+    "copyfiles": "^2.1.1",
     "coveralls": "^3.0.3",
     "jest": "^24.7.1",
     "mockdate": "^2.0.2",
@@ -41,7 +42,8 @@
   "scripts": {
     "start": "node dist/standalone.js",
     "dev": "ts-node-dev --project \"tsconfig.json\" src/standalone.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && npm run copy-template",
+    "copy-template": "copyfiles -u 1 ./**/*.ejs ./dist && copyfiles -u 1 ./**/*.css ./dist",
     "jest": "jest",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "test": "npm run lint && npm run jest",
