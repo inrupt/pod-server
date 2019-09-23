@@ -26,6 +26,14 @@ npm run build
 DEBUG=* npm start
 ```
 
+# Run ldp test suite
+Requires Docker.
+
+```sh
+docker build -t pod-server-ldp-test-suite .
+docker run pod-server-ldp-test-suite
+```
+
 # Architecture
 
 ## The Solid Spec Protocols
