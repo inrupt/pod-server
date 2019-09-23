@@ -14,10 +14,7 @@ import { defaultConfiguration } from 'solid-idp'
 import getRootRenderRouter from './rootRender'
 // import { default as Accepts } from 'accepts'
 
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
-import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
-import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
-import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
+import { IResourceStore, IOperationFactory, IAuthorizer, IHttpHandler } from 'solid-server-ts'
 
 const debug = Debug('server')
 
