@@ -2,6 +2,9 @@ import { Server } from './server'
 import * as fs from 'fs'
 import { BlobTreeNssCompat, BlobTree } from 'wac-ldp'
 import Debug from 'debug'
+import semver from 'semver'
+import { engines } from '../package.json'
+
 
 const debug = Debug('standalone')
 
@@ -10,6 +13,14 @@ const config = JSON.parse(
 )
 
 console.log(config)
+
+const version = engines.node
+if (!semver.satisfies(process.version, version)) {
+  console.log(`Required node version ${version} not satisfied with current version ${process.version}.`)
+  process.exit(1)
+}
+console.log(`Checked that Node version ${process.version} satisfied ${version}.`)
+
 
 // on startup:
 const port = parseInt((config.network.port ? config.network.port : ''), 10) || 8080
