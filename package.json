@@ -11,6 +11,7 @@
     "@types/koa-views": "^2.0.3",
     "@types/node": "^11.12.1",
     "@types/redis": "^2.8.12",
+    "@types/semver": "^6.0.2",
     "@types/ws": "^6.0.1",
     "buffer-to-stream": "^1.0.0",
     "debug": "^4.1.1",
@@ -19,6 +20,7 @@
     "koa-static-server": "^1.4.0",
     "mashlib": "^1.0.0",
     "redis": "^2.8.0",
+    "semver": "^6.3.0",
     "solid-idp": "0.1.5-build3",
     "solid-server-ts": "^0.1.1",
     "wac-ldp": "^0.9.2",
@@ -55,6 +57,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inrupt/pod-server.git"
+  },
+  "engines": {
+    "node": ">=12"
   },
   "author": "inrupt, Inc.",
   "contributors": [
