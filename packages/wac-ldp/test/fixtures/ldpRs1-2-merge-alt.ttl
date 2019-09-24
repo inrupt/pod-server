@@ -1,0 +1,13 @@
+@prefix : <#>.
+@prefix n0: <http://example.org/#>.
+@prefix n1: <http://xmlns.com/foaf/0.1/>.
+@prefix rel: <http://www.perceive.net/schemas/relationship/>.
+
+n0:green-goblin a n1:Person; rel:enemyOf n0:spiderman; n1:name "Green Goblin".
+
+:spiderman
+    a n1:Person;
+    rel:enemyOf :green-goblin;
+    n1:name
+        "Spiderman",
+        "\u0427\u0435\u043b\u043e\u0432\u0435\u043a-\u043f\u0430\u0443\u043a"@ru.

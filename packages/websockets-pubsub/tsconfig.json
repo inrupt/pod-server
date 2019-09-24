@@ -10,7 +10,8 @@
     "sourceMap": true,
     "outDir": "dist",
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "composite": true
   },
   "typeRoots": ["./types"],
   "exclude": [

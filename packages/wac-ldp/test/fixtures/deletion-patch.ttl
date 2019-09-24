@@ -1,0 +1,6 @@
+@prefix rel: <http://www.perceive.net/schemas/relationship/> .
+
+DELETE DATA {
+    <http://example.org/#green-goblin>
+        rel:enemyOf <http://example.org/#spiderman> ;
+}

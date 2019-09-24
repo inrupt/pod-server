@@ -13,7 +13,8 @@
     "esModuleInterop": true,
     "types": [
       "node"
-    ]
+    ],
+    "composite": true
   },
   "typeRoots": [
     "./src/types"

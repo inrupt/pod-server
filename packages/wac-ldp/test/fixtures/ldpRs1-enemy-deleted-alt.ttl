@@ -1,0 +1,6 @@
+@prefix : <#>.
+@prefix n0: <http://example.org/#>.
+@prefix n1: <http://xmlns.com/foaf/0.1/>.
+
+n0:green-goblin a n1:Person; n1:name "Green Goblin".
+

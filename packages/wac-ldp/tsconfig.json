@@ -1,9 +1,31 @@
 {
-  "extends": "../tsconfig.settings.json",
+  "env": "node",
   "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src"
+    "baseUrl": ".",
+    "paths": { "*": ["types/*"] },
+    "target": "es2015",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "strict": true,
+    "outDir": "dist",
+    "declaration": true,
+    "esModuleInterop": true,
+    "composite": true
   },
+  "typeRoots": ["./types"],
+  "typedef": [
+    true,
+    "call-signature",
+    "property-declaration"
+  ],
+  "exclude": [
+    "test",
+    "node_modules",
+    "dist"
+  ],
   "references": [
     { "path": "../websockets-pubsub" }
   ]

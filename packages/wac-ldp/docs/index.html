@@ -1,0 +1,424 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>wac-ldp</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">wac-ldp</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> wac-ldp</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 id="wac-ldp">wac-ldp</h1>
+				<p><a href="https://travis-ci.org/inrupt/wac-ldp"><img src="https://travis-ci.org/inrupt/wac-ldp.svg?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/github/inrupt/wac-ldp?branch=master"><img src="https://coveralls.io/repos/github/inrupt/wac-ldp/badge.svg?branch=master" alt="Coverage Status"></a> <a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/inrupt/wac-ldp.svg" alt="Greenkeeper badge"></a></p>
+				<p>A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.</p>
+				<h2 id="code-structure">Code Structure</h2>
+				<p><img src="https://user-images.githubusercontent.com/408412/57371602-6f1fd880-7193-11e9-8ae2-653f949b731d.png" alt="wac-ldp component diagram">)</p>
+				<h3 id="entry-point">Entry point</h3>
+				<p>The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app. This is not drawn in the diagram above.</p>
+				<h3 id="storage">Storage</h3>
+				<p>The BlobTree storage exposes a carefully tuned interface to the persistence layer, which is similar to the well-known &quot;key-value store&quot; concept, where opaque Blobs can be stored and retrieved, using arbitrary strings as keys. But the BlobTree interface differs from a key-value store interface in that it not only allows writing and reading blobs of data, but also querying &#39;Containers&#39;, which is similar to doing <code>ls</code> on a folder on a unix file system: it gives you a list of the directly contained blobs and containers.
+				This means that if we store all LDP resources inside BlobTree blobs, using the resource path from the http level as the blob&#39;s path at the BlobTree level, then implementing LDP GET requests on containers becomes very easy out of the box.</p>
+				<p>The interface looks as follows (<code>BlobTree</code> in the diagram):</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">interface</span> BlobTree <span class="hljs-keyword">extends</span> events.EventEmitter {
+  getContainer (path: Path): Container
+  getBlob (path: Path): Blob
+}
+<span class="hljs-keyword">interface</span> Node {
+  exists (): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">boolean</span>&gt;,
+  <span class="hljs-keyword">delete</span> (): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}
+<span class="hljs-keyword">interface</span> Blob <span class="hljs-keyword">extends</span> Node {
+  getData (): <span class="hljs-built_in">Promise</span>&lt;ReadableStream | <span class="hljs-literal">undefined</span>&gt;
+  setData (data: ReadableStream): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}
+<span class="hljs-keyword">interface</span> Container <span class="hljs-keyword">extends</span> Node {
+  getMembers (): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">Array</span>&lt;Member&gt;&gt;
+}
+<span class="hljs-keyword">interface</span> Member {
+  name: <span class="hljs-built_in">string</span>
+  isContainer: <span class="hljs-built_in">boolean</span>
+}
+<span class="hljs-keyword">interface</span> Path {
+  <span class="hljs-keyword">constructor</span> (<span class="hljs-params">segments: <span class="hljs-built_in">Array</span>&lt;<span class="hljs-built_in">string</span>&gt;</span>)
+  toParent (<span class="hljs-params"></span>): Path
+  toChild (<span class="hljs-params">segment: <span class="hljs-built_in">string</span></span>): Path
+  isRoot (<span class="hljs-params"></span>): boolean
+  toString (<span class="hljs-params"></span>): string
+  toContainerPathPrefix (<span class="hljs-params"></span>): string
+  hasSuffix (<span class="hljs-params">suffix: <span class="hljs-built_in">string</span></span>): boolean
+  removeSuffix (<span class="hljs-params">suffix: <span class="hljs-built_in">string</span></span>): Path
+  appendSuffix (<span class="hljs-params">suffix: <span class="hljs-built_in">string</span></span>): Path
+}</code></pre>
+				<h3 id="execute-task">Execute Task</h3>
+				<p>The core application code is in src/lib/core/executeTask.ts and given a <code>WacLdpTask</code> (see below), it deals with:</p>
+				<ul>
+					<li>calling the functions from src/lib/authorization/ to determine whether the request is authorized to begin with</li>
+					<li>calling the functions from the &#39;operations on content&#39; component (currently only &#39;RDF&#39;).</li>
+					<li>fetching the main resource from storage</li>
+					<li>in the case of Glob, checking authorization to read each of the contained resources, and fetching those</li>
+					<li>in the case of POST to a container, picking a name for the new resource and fetching a handle to that</li>
+					<li>check the ETag of the resource in case an If-Match or If-None-Match header was present on the request</li>
+					<li>given the necessary handle(s) to BlobTree node(s), execute the desired operation from src/lib/core/basicOperations.ts (in the case of PATCH, adding a parameter whether it should be executed append-only)</li>
+					<li>in case of success, producing the <code>WacLdpResult</code> (see below) result for src/lib/api/http/HttpResponder</li>
+					<li>in case of an exception, throwing the appropriate <code>ErrorResult</code>, to be cast to <code>WacLdpResult</code></li>
+				</ul>
+				<h3 id="auth">Auth</h3>
+				<p>The auth code is in src/lib/authorization/ and deals with:</p>
+				<ul>
+					<li>determining the webId from the bearer token, and checking the signature, expiry, and audience on the there</li>
+					<li>fetching the apprioriate ACL document from storage and loading that into an in-memory RDF graph</li>
+					<li>based on the webId, find out which access modes should be allowed</li>
+					<li>based on the origin, find out whether at least one of the resource owner has that origin as a trusted app</li>
+					<li>decide if the required access mode is authorized (with a special case for append-only approval of a PATCH)</li>
+				</ul>
+				<p>The Auth Interface looks as follows:</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">determineWebId</span> (<span class="hljs-params">bearerToken: <span class="hljs-built_in">string</span>, audience: <span class="hljs-built_in">string</span></span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">string</span> | <span class="hljs-title">undefined</span>&gt;
+<span class="hljs-title">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readAcl</span> (<span class="hljs-params">resourcePath: Path, resourceIsContainer: <span class="hljs-built_in">boolean</span>, storage: BlobTree</span>)
+<span class="hljs-title">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">determineAllowedAgentsForModes</span> (<span class="hljs-params">task: ModesCheckTask</span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">AccessModes</span>&gt;
+<span class="hljs-title">interface</span> <span class="hljs-title">ModesCheckTask</span> </span>{
+  <span class="hljs-title">aclGraph</span>: <span class="hljs-title">any</span>,
+  <span class="hljs-title">isAdjacent</span>: <span class="hljs-title">boolean</span>,
+  <span class="hljs-title">resourcePath</span>: <span class="hljs-title">string</span>
+}
+<span class="hljs-title">interface</span> <span class="hljs-title">AccessModes</span> </span>{
+  <span class="hljs-title">read</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+  <span class="hljs-title">write</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+  <span class="hljs-title">append</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+  <span class="hljs-title">control</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+}
+<span class="hljs-title">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">appIsTrustedForMode</span> (<span class="hljs-params">task: OriginCheckTask</span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">boolean</span>&gt;
+<span class="hljs-title">interface</span> <span class="hljs-title">OriginCheckTask</span> </span>{
+  <span class="hljs-title">origin</span>: <span class="hljs-title">string</span>,
+  <span class="hljs-title">mode</span>: <span class="hljs-title">string</span>,
+  <span class="hljs-title">resourceOwners</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+}</span></code></pre>
+				<h3 id="http">HTTP</h3>
+				<p>In src/lib/api/http/ are two important classes, one for parsing an incoming http request, and one for constructing an outgoing http response. Although each step they do, like setting a numeric http response status code, or extracting a bearer token string from an authorization header, is computationally simple, a lot of the correctness of this module (looking at <a href="https://github.com/w3c/ldp-testsuite">https://github.com/w3c/ldp-testsuite</a> and the WAC test suite that is under development) depends on the details in these two files.</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">interface</span> WacLdpTask {
+  isContainer: <span class="hljs-built_in">boolean</span>
+  omitBody: <span class="hljs-built_in">boolean</span>
+  parsedContentType: ParsedContentType | <span class="hljs-literal">undefined</span>
+  origin: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  contentType: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  ifMatch: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  ifNoneMatchStar: <span class="hljs-built_in">boolean</span>
+  ifNoneMatchList: <span class="hljs-built_in">Array</span>&lt;<span class="hljs-built_in">string</span>&gt; | <span class="hljs-literal">undefined</span>
+  bearerToken: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  wacLdpTaskType: TaskType
+  path: Path
+  requestBody: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+}
+<span class="hljs-keyword">enum</span> TaskType {
+  containerRead,
+  containerMemberAdd,
+  containerDelete,
+  globRead,
+  blobRead,
+  blobWrite,
+  blobUpdate,
+  blobDelete,
+  getOptions,
+  unknown
+}
+<span class="hljs-keyword">enum</span> ParsedContentType {
+  RdfJsonLd,
+  RdfTurtle
+}
+<span class="hljs-keyword">interface</span> WacLdpResponse {
+  resultType: ResultType
+  resourceData: ResourceData | <span class="hljs-literal">undefined</span>
+  createdLocation: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  isContainer: <span class="hljs-built_in">boolean</span>
+}</code></pre>
+				<h3 id="rdf">RDF</h3>
+				<p>The following operations are available:</p>
+				<ul>
+					<li>readFromBlob (looks at the content-type and the body and reads these into an in-memory RDF graph object)</li>
+					<li>readFromContainer (looks at the container member list and reads that into an in-memory RDF graph object)</li>
+					<li>writeToBlob (serializes an RDF graph object to the requested representation)</li>
+					<li>applyPatch</li>
+					<li>applyFilter</li>
+				</ul>
+				<p>Currently supported representations for RDF are Turtle and JSON-LD. The only currently allowed patch type for RDF are <code>SPARQL-update (any)</code> and <code>SPARQL-update (appendOnly)</code>. The currently allowed filter types for RDF are <code>SPARQL-SELECT</code>, <code>ldp-paging</code>, and <code>prefer-minimal-container</code>.
+				In the future, we might add similar modules for e.g. HTML/RDFa or partial updates to binary blobs, and when that happens we will turn this component into an abstract &#39;content operations&#39; component, of which RDF, HTML/RDFa and Binary are instantiations.</p>
+				<p>Published under an MIT license by inrupt, Inc.</p>
+				<p>Contributors:</p>
+				<ul>
+					<li>Michiel de Jong</li>
+					<li>Ruben Verborgh</li>
+					<li>Kjetil Kjernsmo</li>
+					<li>Jackson Morgan</li>
+					<li>Pat McBennett</li>
+					<li>Justin Bingham</li>
+					<li>Sebastien Dubois</li>
+					<li>elf Pavlik</li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/___mocks___http_.html">"__mocks__/http"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/___mocks___node_fetch_.html">"__mocks__/node-<wbr>fetch"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_exports_.html">"exports"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_api_http_httpparser_.html">"lib/api/http/<wbr>Http<wbr>Parser"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_api_http_httpresponder_.html">"lib/api/http/<wbr>Http<wbr>Responder"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_authentication_determinewebidandorigin_.html">"lib/authentication/determine<wbr>Web<wbr>IdAnd<wbr>Origin"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_authorization_aclmanager_.html">"lib/authorization/<wbr>Acl<wbr>Manager"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_authorization_appistrustedformode_.html">"lib/authorization/app<wbr>IsTrusted<wbr>For<wbr>Mode"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_authorization_checkaccess_.html">"lib/authorization/check<wbr>Access"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_authorization_determineallowedmodes_.html">"lib/authorization/determine<wbr>Allowed<wbr>Modes"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_core_wacldp_.html">"lib/core/<wbr>Wac<wbr>Ldp"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_containermemberaddhandler_.html">"lib/operation<wbr>Handlers/container<wbr>Member<wbr>Add<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_deleteblobhandler_.html">"lib/operation<wbr>Handlers/delete<wbr>Blob<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_deletecontainerhandler_.html">"lib/operation<wbr>Handlers/delete<wbr>Container<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_getresourcedataandchecketag_.html">"lib/operation<wbr>Handlers/get<wbr>Resource<wbr>Data<wbr>And<wbr>CheckETag"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_globreadhandler_.html">"lib/operation<wbr>Handlers/glob<wbr>Read<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_optionshandler_.html">"lib/operation<wbr>Handlers/options<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_readblobhandler_.html">"lib/operation<wbr>Handlers/read<wbr>Blob<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_readcontainerhandler_.html">"lib/operation<wbr>Handlers/read<wbr>Container<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_unknownoperationcatchall_.html">"lib/operation<wbr>Handlers/unknown<wbr>Operation<wbr>Catch<wbr>All"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_updateblobhandler_.html">"lib/operation<wbr>Handlers/update<wbr>Blob<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_operationhandlers_writeblobhandler_.html">"lib/operation<wbr>Handlers/write<wbr>Blob<wbr>Handler"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_rdflibstoremanager_.html">"lib/rdf/<wbr>Rdf<wbr>Lib<wbr>Store<wbr>Manager"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_resourcedatautils_.html">"lib/rdf/<wbr>Resource<wbr>Data<wbr>Utils"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_storemanager_.html">"lib/rdf/<wbr>Store<wbr>Manager"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_acl_.html">"lib/rdf/generated-<wbr>vocab-<wbr>acl"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_foaf_.html">"lib/rdf/generated-<wbr>vocab-<wbr>foaf"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_ldp_.html">"lib/rdf/generated-<wbr>vocab-<wbr>ldp"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_rdf_.html">"lib/rdf/generated-<wbr>vocab-<wbr>rdf"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_vcard_.html">"lib/rdf/generated-<wbr>vocab-<wbr>vcard"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_mergerdfsources_.html">"lib/rdf/merge<wbr>Rdf<wbr>Sources"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_rdf_constants_.html">"lib/rdf/rdf-<wbr>constants"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_rdftoresourcedata_.html">"lib/rdf/rdf<wbr>ToResource<wbr>Data"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_setappmodes_.html">"lib/rdf/set<wbr>App<wbr>Modes"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_blob_.html">"lib/storage/<wbr>Blob"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_blobtree_.html">"lib/storage/<wbr>Blob<wbr>Tree"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_blobtreeinmem_.html">"lib/storage/<wbr>Blob<wbr>Tree<wbr>InMem"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_container_.html">"lib/storage/<wbr>Container"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_node_.html">"lib/storage/<wbr>Node"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_quadandblobstore_.html">"lib/storage/<wbr>Quad<wbr>And<wbr>Blob<wbr>Store"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_memberslistasresourcedata_.html">"lib/storage/members<wbr>List<wbr>AsResource<wbr>Data"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_util_calculateetag_.html">"lib/util/calculateETag"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_server_.html">"server"</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

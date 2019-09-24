@@ -1,0 +1,24 @@
+{
+  "@context": {
+    "wac": "http://www.w3.org/ns/auth/acl#",
+    "agent": {"@id": "wac:agent", "@type": "@id"},
+    "accessTo": {"@id": "wac:accessTo", "@type": "@id"},
+    "default": {"@id": "wac:default", "@type": "@id"},
+    "mode": {"@id": "wac:mode", "@type": "@vocab"},
+    "Read": {"@id": "wac:Read"},
+    "Write": {"@id": "wac:Write"},
+    "Control": {"@id": "wac:Control"}
+  },
+  "@type": "http://www.w3.org/ns/auth/acl#Authorization",
+  "agent": [
+    "https://michielbdejong.inrupt.net/profile/card#me",
+    "mailto:michiel@unhosted.org"
+  ],
+  "accessTo": "https://example.org/",
+  "default": "https://example.org/",
+  "mode": [
+    "Read",
+    "Write",
+    "Control"
+  ]
+}
