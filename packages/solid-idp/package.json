@@ -6,8 +6,8 @@
   "engines": {
     "node": ">= 8.9.0"
   },
-  "main": "./lib/index.js",
-  "typings": "./lib/index.d.ts",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts",
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/lodash": "4.14.123",
@@ -51,12 +51,12 @@
   },
   "scripts": {
     "clean": "rimraf coverage tmp",
-    "build": "tsc -b && npm run copy-template",
-    "watch": "tsc --watch --preserveWatchOutput -b",
+    "build": "tsc -p tsconfig.json && npm run copy-template",
+    "watch": "tsc --watch --preserveWatchOutput -p tsconfig.json",
     "dev": "ts-node-dev --project \"tsconfig.json\" examples/koa.ts",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "mocha": "ts-mocha -p \"tsconfig.json\" test/**/*.ts",
     "test": "npm run lint && npm run mocha",
-    "copy-template": "copyfiles -u 1 ./src/**/*.ejs ./lib && copyfiles -u 1 ./src/**/*.css ./lib"
+    "copy-template": "copyfiles -u 1 ./src/**/*.ejs ./dist && copyfiles -u 1 ./src/**/*.css ./dist"
   }
 }

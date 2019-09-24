@@ -1,19 +1,26 @@
 {
-  "extends": "../tsconfig.settings.json",
+  "env": "node",
   "compilerOptions": {
-    "outDir": "./lib",
-    "rootDir": "./src"
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": [
+      "node"
+    ]
   },
-  "references": [],
   "typeRoots": [
-    "./types"
-  ],
-  "include": [
-    "src"
+    "./src/types"
   ],
   "exclude": [
     "test",
     "node_modules",
-    "lib"
+    "dist"
   ]
 }

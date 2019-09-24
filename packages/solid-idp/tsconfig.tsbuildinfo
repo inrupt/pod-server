@@ -2649,6 +2649,11 @@
         "./src/core/solididp.ts",
         "./src/defaultconfiguration/defaultconfiguration.ts"
       ],
+      "./src/types/mz-fs.d.ts": [
+        "./node_modules/@types/node/fs.d.ts",
+        "./node_modules/@types/node/util.d.ts",
+        "./node_modules/@types/node/ts3.2/util.d.ts"
+      ],
       "./node_modules/@types/tough-cookie/index.d.ts": [
         "./node_modules/@types/node/util.d.ts",
         "./node_modules/@types/node/ts3.2/util.d.ts"
@@ -2660,6 +2665,17 @@
         "./node_modules/@types/node/stream.d.ts",
         "./node_modules/@types/tough-cookie/index.d.ts",
         "./node_modules/@types/node/ts3.2/index.d.ts",
+        "./node_modules/@types/node/util.d.ts",
+        "./node_modules/@types/node/ts3.2/util.d.ts"
+      ],
+      "./src/types/oidc-provider.d.ts": [
+        "./node_modules/@types/node/http.d.ts",
+        "./node_modules/@types/node/http2.d.ts",
+        "./node_modules/@types/node/events.d.ts",
+        "./node_modules/@types/keygrip/index.d.ts",
+        "./node_modules/@types/nodemailer/lib/shared.d.ts",
+        "./node_modules/@types/koa/index.d.ts",
+        "./node_modules/@types/got/index.d.ts",
         "./node_modules/@types/node/util.d.ts",
         "./node_modules/@types/node/ts3.2/util.d.ts"
       ],
@@ -2684,22 +2700,6 @@
         "./node_modules/@types/node/ts3.2/util.d.ts"
       ],
       "./node_modules/@types/strip-json-comments/index.d.ts": [
-        "./node_modules/@types/node/util.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts"
-      ],
-      "./src/types/mz-fs.d.ts": [
-        "./node_modules/@types/node/fs.d.ts",
-        "./node_modules/@types/node/util.d.ts",
-        "./node_modules/@types/node/ts3.2/util.d.ts"
-      ],
-      "./src/types/oidc-provider.d.ts": [
-        "./node_modules/@types/node/http.d.ts",
-        "./node_modules/@types/node/http2.d.ts",
-        "./node_modules/@types/node/events.d.ts",
-        "./node_modules/@types/keygrip/index.d.ts",
-        "./node_modules/@types/nodemailer/lib/shared.d.ts",
-        "./node_modules/@types/koa/index.d.ts",
-        "./node_modules/@types/got/index.d.ts",
         "./node_modules/@types/node/util.d.ts",
         "./node_modules/@types/node/ts3.2/util.d.ts"
       ]
@@ -2795,6 +2795,7 @@
       "./node_modules/@types/koa-compose/index.d.ts",
       "./node_modules/@types/koa/index.d.ts",
       "./node_modules/@types/koa-cors/index.d.ts",
+      "./src/core/solididp.ts",
       "./node_modules/@types/debug/index.d.ts",
       "./node_modules/@types/koa-router/index.d.ts",
       "./node_modules/@types/koa-views/index.d.ts",
@@ -2814,7 +2815,12 @@
       "./node_modules/@types/nodemailer/lib/stream-transport.d.ts",
       "./node_modules/@types/nodemailer/index.d.ts",
       "./node_modules/@types/nodemailer/lib/smtp-transport.d.ts",
+      "./src/defaultconfiguration/handlers/logininteraction.handler.ts",
+      "./src/defaultconfiguration/handlers/confirminteraction.handler.ts",
       "./src/defaultconfiguration/handlers/initialinteraction.handler.ts",
+      "./src/defaultconfiguration/handlers/forgotpasswordinteraction.handler.ts",
+      "./src/defaultconfiguration/handlers/registerinteraction.handler.ts",
+      "./src/defaultconfiguration/handlers/resetpassword.handler.ts",
       "./node_modules/@types/lodash/common/common.d.ts",
       "./node_modules/@types/lodash/common/array.d.ts",
       "./node_modules/@types/lodash/common/collection.d.ts",
@@ -2828,33 +2834,27 @@
       "./node_modules/@types/lodash/common/string.d.ts",
       "./node_modules/@types/lodash/common/util.d.ts",
       "./node_modules/@types/lodash/index.d.ts",
+      "./src/defaultconfiguration/account.ts",
+      "./src/defaultconfiguration/storage/filesystem/filesystemadapter.ts",
       "./node_modules/@types/ioredis/index.d.ts",
+      "./src/defaultconfiguration/storage/redis/redisadapter.ts",
       "./node_modules/@types/bcryptjs/index.d.ts",
       "./node_modules/@types/uuid/interfaces.d.ts",
       "./node_modules/@types/uuid/index.d.ts",
+      "./src/defaultconfiguration/storage/redis/redisaccount.ts",
+      "./src/defaultconfiguration/storage/filesystem/filesystemaccount.ts",
+      "./src/defaultconfiguration/defaultconfiguration.ts",
+      "./src/index.ts",
+      "./src/types/mz-fs.d.ts",
       "./node_modules/@types/tough-cookie/index.d.ts",
       "./node_modules/@types/got/index.d.ts",
+      "./src/types/oidc-provider.d.ts",
       "./node_modules/@types/chai/index.d.ts",
       "./node_modules/@types/json5/index.d.ts",
       "./node_modules/@types/mocha/index.d.ts",
       "./node_modules/@types/sinon/ts3.1/index.d.ts",
       "./node_modules/@types/strip-bom/index.d.ts",
-      "./node_modules/@types/strip-json-comments/index.d.ts",
-      "./src/core/solididp.ts",
-      "./src/defaultconfiguration/account.ts",
-      "./src/defaultconfiguration/defaultconfiguration.ts",
-      "./src/defaultconfiguration/storage/redis/redisadapter.ts",
-      "./src/defaultconfiguration/storage/filesystem/filesystemaccount.ts",
-      "./src/types/mz-fs.d.ts",
-      "./src/types/oidc-provider.d.ts",
-      "./src/defaultconfiguration/handlers/logininteraction.handler.ts",
-      "./src/defaultconfiguration/handlers/confirminteraction.handler.ts",
-      "./src/defaultconfiguration/handlers/forgotpasswordinteraction.handler.ts",
-      "./src/defaultconfiguration/handlers/registerinteraction.handler.ts",
-      "./src/defaultconfiguration/handlers/resetpassword.handler.ts",
-      "./src/defaultconfiguration/storage/filesystem/filesystemadapter.ts",
-      "./src/defaultconfiguration/storage/redis/redisaccount.ts",
-      "./src/index.ts"
+      "./node_modules/@types/strip-json-comments/index.d.ts"
     ]
   },
   "version": "3.6.3"

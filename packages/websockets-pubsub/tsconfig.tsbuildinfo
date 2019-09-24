@@ -649,7 +649,6 @@
       "esModuleInterop": true,
       "outDir": "./lib",
       "rootDir": "./src",
-      "project": "./tsconfig.json",
       "configFilePath": "./tsconfig.json"
     },
     "referencedMap": {
