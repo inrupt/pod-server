@@ -109,6 +109,7 @@ export class Server {
         const storageRootStr = this.screenNameToStorageRootStr(screenName)
         const webIdStr = this.storageRootStrToWebIdStr(storageRootStr)
         await provisionStorage(this.wacLdp as WacLdp, new URL(storageRootStr), new URL(webIdStr))
+        await provisionProfile(this.wacLdp as WacLdp, new URL(webIdStr), screenName)
         return webIdStr
       },
       keystore: this.keystore,
