@@ -51,8 +51,8 @@
   },
   "scripts": {
     "clean": "rimraf coverage tmp",
-    "build": "tsc -p tsconfig.json && npm run copy-template",
-    "watch": "tsc --watch --preserveWatchOutput -p tsconfig.json",
+    "build": "tsc -b && npm run copy-template",
+    "watch": "tsc --watch --preserveWatchOutput -b",
     "dev": "ts-node-dev --project \"tsconfig.json\" examples/koa.ts",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "mocha": "ts-mocha -p \"tsconfig.json\" test/**/*.ts",
