@@ -5,8 +5,11 @@
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "strict": true,
+        "strict": false,
         "composite": true,
         "esModuleInterop": true
-    }
+    },
+    "typeRoots": [
+        "./types"
+    ],
 }
