@@ -7,6 +7,8 @@ const debug = Debug('hub')
 const BEARER_PREFIX = 'Bearer '
 const SUBSCRIBE_COMMAND_PREFIX = 'sub '
 
+console.log('NOOP NOOP')
+
 interface Client {
   webSocket: any
   webIdPromise: Promise<URL>

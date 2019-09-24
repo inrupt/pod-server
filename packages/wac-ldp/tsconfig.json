@@ -12,8 +12,7 @@
     "strict": true,
     "outDir": "dist",
     "declaration": true,
-    "esModuleInterop": true,
-    "composite": true
+    "esModuleInterop": true
   },
   "typeRoots": ["./types"],
   "typedef": [

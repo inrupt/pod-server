@@ -8,11 +8,15 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "outDir": "dist",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "esModuleInterop": true,
     "composite": true
   },
+  "include": [
+    "src"
+  ],
   "typeRoots": ["./types"],
   "exclude": [
     "test",
