@@ -146,6 +146,7 @@ export class Server {
     const loginRouter = new Router()
     loginRouter.get('/.well-known/openid-configuration', (ctx, next) => {
       ctx.status = 301
+      ctx.res.setHeader('Access-Control-Allow-Origin', '*')
       ctx.redirect(`${this.rootOrigin}/.well-known/openid-configuration`)
       ctx.body = 'Redirecting to openid configuration'
     })
