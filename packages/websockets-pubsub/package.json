@@ -2,7 +2,7 @@
   "name": "websockets-pubsub",
   "version": "0.3.4",
   "description": "WebSocket pubsub for Solid pod servers, see https://github.com/solid/solid-spec/blob/master/api-websockets.md",
-  "main": "lib/hub.js",
+  "main": "dist/hub.js",
   "dependencies": {
     "@types/debug": "^4.1.4",
     "@types/node": "^11.12.1",
@@ -27,7 +27,7 @@
     "typescript": "^3.4.2"
   },
   "scripts": {
-    "start": "node lib/server.js",
+    "start": "node dist/server.js",
     "dev": "DEBUG=* ts-node-dev --project \"tsconfig.json\" src/server.ts",
     "build": "tsc -b",
     "jest": "jest",
