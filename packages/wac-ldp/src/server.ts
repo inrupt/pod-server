@@ -55,7 +55,6 @@ class Server {
     this.server = http.createServer(this.wacLdp.handler.bind(this.wacLdp))
   }
   listen () {
-    console.log('mee mah')
     this.server.listen(this.port)
     debug('listening on port', this.port)
   }

@@ -10,15 +10,20 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "strict": true,
-    "outDir": "dist",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "composite": true
   },
   "typeRoots": ["./types"],
   "typedef": [
     true,
     "call-signature",
     "property-declaration"
+  ],
+  "include": [
+    "src"
   ],
   "exclude": [
     "test",
