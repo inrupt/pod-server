@@ -143,6 +143,11 @@ export class Server {
 
     // HACK: in order for the login page to show up, a separate file must be run at /.well-known/solid/login which I find very dirty -- jackson
     const loginRouter = new Router()
+    loginRouter.get('/.well-known/openid-configuration', (ctx, next) => {
+      ctx.status = 301
+      ctx.redirect(`${this.rootOrigin}/.well-known/openid-configuration`)
+      ctx.body = 'Redirecting to openid configuration'
+    })
     loginRouter.get('/.well-known/solid/login', (ctx, next) => {
       debug('sending login html')
       ctx.res.writeHead(200, {})
