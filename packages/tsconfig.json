@@ -1,0 +1,9 @@
+{
+    "files": [],
+    "references": [
+        { "path": "pod-server" },
+        { "path": "solid-idp" },
+        { "path": "wac-ldp" },
+        { "path": "websockets-pubsub" },
+    ]
+}
