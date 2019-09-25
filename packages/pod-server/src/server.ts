@@ -103,7 +103,7 @@ export class Server {
       issuer: this.rootOrigin,
       pathPrefix: '',
       mailConfiguration: this.mailConfiguration,
-      webIdFromUsername: async screenname => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
+      webIdFromUsername: async (screenname: string) => this.storageRootStrToWebIdStr(this.screenNameToStorageRootStr(screenname)),
       onNewUser: async (screenName: string) => {
         debug('new user', screenName)
         const storageRootStr = this.screenNameToStorageRootStr(screenName)

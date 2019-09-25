@@ -22,7 +22,7 @@
         "signature": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9"
       },
       "../solid-idp/lib/index.d.ts": {
-        "version": "9eb4b0eb7f0be121d38d153c99090306a23eac561624d2a934b5422e77c7ae36",
+        "version": "9eb4b0eb7f0be121d38d153c99090306a23eac561624d2a934b5422e77c7ae36",f
         "signature": "9eb4b0eb7f0be121d38d153c99090306a23eac561624d2a934b5422e77c7ae36"
       },
       "../wac-ldp/lib/index.d.ts": {
