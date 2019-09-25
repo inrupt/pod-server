@@ -1,0 +1,7 @@
+v0.2.0:
+* fixed many bugs
+* removed the operations component
+* introduced the RDF component
+
+v0.1.0:
+* initial version
