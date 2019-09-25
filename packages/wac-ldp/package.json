@@ -12,7 +12,7 @@
     "@types/jsonwebtoken": "^8.3.2",
     "@types/mime-types": "^2.1.0",
     "@types/n3": "^1.1.1",
-    "@types/node": "^12.7.4",
+    "@types/node": "^12.7.7",
     "@types/node-fetch": "^2.5.0",
     "@types/node-rsa": "^1.0.0",
     "@types/sparqljs": "^2.1.0",
