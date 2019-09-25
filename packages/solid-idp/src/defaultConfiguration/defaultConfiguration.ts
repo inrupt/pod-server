@@ -81,7 +81,7 @@ const handlers: ((oidc: Provider, config: InternalConfigs) => Router)[] = [
 ]
 
 const getStorage = async (config: DefaultConfigurationConfigs): Promise<SolidIDPStorage> => {
-  let storage;
+  let storage
   if (config.storagePreset) {
     switch (config.storagePreset) {
       case 'redis':
@@ -109,7 +109,7 @@ export default async function defaultConfiguration (config: DefaultConfiguration
   const internalConfigs: InternalConfigs = {
     ...config,
     pathPrefix: config.pathPrefix || '',
-    storage: await getStorage(config),
+    storage: await getStorage(config)
   }
 
   const oidc = new Provider(config.issuer, {
