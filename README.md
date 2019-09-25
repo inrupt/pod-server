@@ -18,17 +18,16 @@ npm run bootstrap
 
 ## Dev
 ```bash
-npm run build
 npm run dev
 ```
 
 ## Test
 ```bash
-npm run build
 npm run test
 ```
 
 ## Build and Publish
 ```bash
 npm run build
+npm run publish
 ```
