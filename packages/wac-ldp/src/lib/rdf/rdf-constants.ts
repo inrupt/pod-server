@@ -1,0 +1,5 @@
+export { ACL } from './generated-vocab-acl'
+export { FOAF } from './generated-vocab-foaf'
+export { LDP } from './generated-vocab-ldp'
+export { RDF } from './generated-vocab-rdf'
+export { VCARD } from './generated-vocab-vcard'

@@ -1,7 +1,5 @@
 node_modules
-lib
 dist
 */node_modules
-*/lib
 lerna-debug.log
 tsconfig.tsbuildinfo
