@@ -25,3 +25,8 @@ npm run dev
 ```bash
 npm run test
 ```
+
+## Build and Publish
+```bash
+npm run build
+```
