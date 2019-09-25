@@ -53,7 +53,8 @@
   },
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "DEBUG=* ts-node-dev --project \"tsconfig.json\" src/server.ts",
+    "dev": "tsc --watch --preserveWatchOutput -p tsconfig.json",
+    "standalone-dev": "DEBUG=* ts-node-dev --project \"tsconfig.json\" src/server.ts",
     "build": "tsc -p tsconfig.json",
     "jest": "jest",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",

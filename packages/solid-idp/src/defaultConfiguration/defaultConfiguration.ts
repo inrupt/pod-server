@@ -114,9 +114,9 @@ export default async function defaultConfiguration (config: DefaultConfiguration
 
   const oidc = new Provider(config.issuer, {
     // @ts-ignore
-    adapter: config.storage.sessionAdapter,
+    adapter: internalConfigs.storage.sessionAdapter,
     findAccount: DefaultConfigAccount.findById,
-    jwks: config.keystore,
+    jwks: internalConfigs.keystore,
     claims: {
       openid: ['sub'],
       email: ['email', 'email_verified']
@@ -133,7 +133,7 @@ export default async function defaultConfiguration (config: DefaultConfiguration
     },
     features: {
       devInteractions: { enabled: false },
-      dangerouslyEnableLocalhost: new URL(config.issuer).protocol !== 'https:'
+      dangerouslyEnableLocalhost: new URL(internalConfigs.issuer).protocol !== 'https:'
     },
     routes: {
       authorization: `${internalConfigs.pathPrefix}/auth`,

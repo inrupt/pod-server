@@ -1,7 +1,7 @@
 {
 	"scripts": {
 		"build": "lerna run build",
-		"dev": "lerna run dev",
+		"dev": "lerna run --parallel dev",
 		"test-dev": "lerna run test-dev",
 		"test": "lerna run test",
 		"publish": "lerna publish"

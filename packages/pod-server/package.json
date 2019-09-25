@@ -43,7 +43,7 @@
   },
   "scripts": {
     "start": "node dist/standalone.js",
-    "dev": "ts-node-dev --project \"tsconfig.json\" src/standalone.ts",
+    "dev": "ts-node-dev --project \"tsconfig.json\" src/standalone.ts --watch \"../solid-idp\", \"../wac-ldp\", \"../websockets-pubsub\"",
     "build": "tsc -p tsconfig.json && npm run copy-template",
     "copy-template": "copyfiles -u 1 ./src/**/*.ejs ./dist && copyfiles -u 1 ./src/**/*.css ./dist",
     "jest": "jest",
