@@ -3,7 +3,7 @@ import * as https from 'https'
 import * as fs from 'fs'
 import Debug from 'debug'
 import path from 'path'
-import { BlobTree, WacLdp, WacLdpOptions, QuadAndBlobStore, NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } from 'wac-ldp'
+import { BlobTree, WacLdp, WacLdpOptions, StoreManager, QuadAndBlobStore, NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } from 'wac-ldp'
 import * as WebSocket from 'ws'
 import { Hub } from 'websockets-pubsub'
 import Koa from 'koa'
@@ -14,10 +14,7 @@ import { defaultConfiguration } from 'solid-idp'
 import getRootRenderRouter from './rootRender'
 // import { default as Accepts } from 'accepts'
 
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
-import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
-import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
-import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
+import { IResourceStore, IOperationFactory, IAuthorizer, IHttpHandler } from 'solid-server-ts'
 
 const debug = Debug('server')
 
@@ -43,13 +40,14 @@ interface OptionsObject {
 }
 
 export class Server {
-  resourceStore: IResourceStore
   operationFactory: IOperationFactory
   authorizer: IAuthorizer
-  storage: BlobTree
   server: http.Server | undefined
   hub: Hub | undefined
   port: number
+  lowLevelResourceStore: IResourceStore
+  midLevelResourceStore: IResourceStore
+  highLevelResourceStore: IResourceStore
   wsServer: any
   app: Koa | undefined
   idpRouter: any
@@ -68,12 +66,14 @@ export class Server {
     this.useHttps = options.useHttps
     this.keystore = options.keystore
     this.rootOrigin = `http${(this.useHttps ? 's' : '')}://${this.rootDomain}`
-    this.storage = options.storage
-    this.resourceStore = new NssCompatResourceStore()
-    this.operationFactory = new DefaultOperationFactory(this.resourceStore)
-    this.authorizer = new AclBasedAuthorizer(this.resourceStore)
+    this.lowLevelResourceStore = options.storage
+    this.midLevelResourceStore = new QuadAndBlobStore(this.lowLevelResourceStore as BlobTree) // singleton on-disk storage
+    this.highLevelResourceStore = new StoreManager(options.rootDomain, this.midLevelResourceStore as QuadAndBlobStore)
+    this.operationFactory = new DefaultOperationFactory(this.highLevelResourceStore as StoreManager)
+    this.authorizer = new AclBasedAuthorizer(this.highLevelResourceStore as StoreManager)
+
     this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
-      storage: new QuadAndBlobStore(this.storage),
+      storage: this.midLevelResourceStore as QuadAndBlobStore,
       aud: this.rootOrigin,
       updatesViaUrl: this.webSocketUrl(),
       skipWac: false,
@@ -109,6 +109,7 @@ export class Server {
         const storageRootStr = this.screenNameToStorageRootStr(screenName)
         const webIdStr = this.storageRootStrToWebIdStr(storageRootStr)
         await provisionStorage(this.wacLdp as WacLdp, new URL(storageRootStr), new URL(webIdStr))
+        await provisionProfile(this.wacLdp as WacLdp, new URL(webIdStr), screenName)
         return webIdStr
       },
       keystore: this.keystore,
@@ -145,6 +146,7 @@ export class Server {
     const loginRouter = new Router()
     loginRouter.get('/.well-known/openid-configuration', (ctx, next) => {
       ctx.status = 301
+      ctx.res.setHeader('Access-Control-Allow-Origin', '*')
       ctx.redirect(`${this.rootOrigin}/.well-known/openid-configuration`)
       ctx.body = 'Redirecting to openid configuration'
     })
