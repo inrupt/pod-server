@@ -1,0 +1,59 @@
+{
+  "name": "websockets-pubsub",
+  "version": "0.3.4",
+  "description": "WebSocket pubsub for Solid pod servers, see https://github.com/solid/solid-spec/blob/master/api-websockets.md",
+  "main": "dist/hub.js",
+  "dependencies": {
+    "@types/debug": "^4.1.4",
+    "@types/node": "^11.12.1",
+    "@types/ws": "^6.0.1",
+    "debug": "^4.1.1",
+    "wac-ldp": "^0.8.0",
+    "ws": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.11",
+    "@types/mockdate": "^2.0.0",
+    "@types/node-fetch": "^2.3.3",
+    "coveralls": "^3.0.3",
+    "jest": "^24.7.1",
+    "mockdate": "^2.0.2",
+    "node-fetch": "^2.5.0",
+    "ts-jest": "^24.0.2",
+    "ts-node-dev": "^1.0.0-pre.32",
+    "tslint": "^5.15.0",
+    "tslint-config-standard": "^8.0.1",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.4.2"
+  },
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "tsc --watch --preserveWatchOutput -p tsconfig.json",
+    "standalone-dev": "DEBUG=* ts-node-dev --project \"tsconfig.json\" src/server.ts",
+    "build": "tsc -b",
+    "jest": "jest",
+    "lint": "tslint -t stylish --project \"tsconfig.json\"",
+    "test": "npm run lint && npm run jest",
+    "docs": "typedoc --out docs --mode modules src",
+    "coverage": "jest --coverage",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inrupt/websockets-pubsub.git"
+  },
+  "author": "inrupt, Inc.",
+  "contributors": [
+    "Michiel de Jong (https://github.com/michielbdejong)",
+    "Jackson Morgan (https://github.com/jaxoncreed)",
+    "Ruben Verborgh (https://github.com/rubenverborgh)",
+    "Kjetil Kjernsmo (https://github.com/kjetilk)",
+    "Pat McBennett (https://github.com/pmcb55)",
+    "Justin Bingham (https://github.com/justinwb)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inrupt/websockets-pubsub/issues"
+  },
+  "homepage": "https://github.com/inrupt/websockets-pubsub#readme"
+}

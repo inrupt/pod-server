@@ -1,0 +1,31 @@
+{
+  "env": "node",
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": [
+      "node"
+    ],
+    "composite": true
+  },
+  "include": [
+    "src"
+  ],
+  "typeRoots": [
+    "./src/types"
+  ],
+  "exclude": [
+    "test",
+    "node_modules",
+    "dist"
+  ]
+}

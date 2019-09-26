@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "strict": false,
+        "composite": true,
+        "esModuleInterop": true
+    },
+    "typeRoots": [
+        "./types"
+    ],
+}

@@ -1,0 +1,33 @@
+{
+  "env": "node",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "*": ["../types/*"] },
+    "target": "es2015",
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true,
+    "esModuleInterop": true
+  },
+  "typeRoots": ["../types"],
+  "exclude": [
+    "test",
+    "node_modules",
+    "dist"
+  ],
+  "include": [
+    "src"
+  ],
+  "references": [
+    { "path": "../wac-ldp" },
+    { "path": "../solid-idp" },
+    { "path": "../websockets-pubsub" }
+  ]
+}
