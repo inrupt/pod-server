@@ -55,7 +55,10 @@ function applyNetworkConfigurationDefaults(networkConfig?: NetworkConfiguration)
     return applyNetworkConfigurationDefaults(defaultConfiguration.network)
   }
   validateSchema(newtworkConfigurationSchema, networkConfig)
-  return networkConfig as NetworkManditoryOptionsConfiguration
+  return {
+    ...networkConfig,
+    url: new URL(`${networkConfig.protocol}://${networkConfig.hostname}:${networkConfig.port}`)
+  } as NetworkManditoryOptionsConfiguration
 }
 
 /*

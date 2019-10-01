@@ -30,6 +30,7 @@ export interface NetworkConfiguration {
 }
 
 export interface NetworkManditoryOptionsConfiguration extends NetworkConfiguration {
+  url: URL
   hostname: string
   port: number
   protocol: 'http' | 'https'
