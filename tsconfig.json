@@ -1,8 +1,8 @@
 {
   "env": "node",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": { "*": ["types/*"] },
+    "baseUrl": "./src",
+    "paths": { "*": ["external-types/*"] },
     "target": "es2015",
     "strict": true,
     "module": "commonjs",
@@ -15,7 +15,7 @@
     "declaration": true,
     "esModuleInterop": true
   },
-  "typeRoots": ["./types"],
+  "typeRoots": ["../external-types"],
   "exclude": [
     "test",
     "node_modules",
