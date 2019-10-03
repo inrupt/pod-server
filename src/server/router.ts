@@ -1,6 +1,6 @@
 import Router, { IRouterParamContext } from 'koa-router'
 import { PodServerManditoryOptionsConfiguration } from '../types/configuration.types';
-import { Context, ParameterizedContext } from 'koa';
+import Koa, { Context, ParameterizedContext } from 'koa';
 
 // TODO: this whole file will be changed once routing configuration is enabled. But for now, we hard code the subdomain routing strategy
 
@@ -22,28 +22,27 @@ function getRootRouter(config: PodServerManditoryOptionsConfiguration): Router {
   return router
 }
 
-export default function getPodServerRouter(config: PodServerManditoryOptionsConfiguration): Router {
-  // const passIfSubdomain = async (shouldPass: boolean, ctx: ParameterizedContext<any, IRouterParamContext>, next: () => Promise<any>, givenRouter: Router): Promise<any> => {
-  //   console.log('getting called')
-  //   if ((ctx.origin !== config.network.url.origin) === (shouldPass)) {
-  //     await givenRouter.routes()(ctx, async () => {
-  //       await givenRouter.allowedMethods()(ctx, next)
-  //     })
-  //   }
-  //   await next()
-  // }
+export default function initailizeRoutes(app: Koa, config: PodServerManditoryOptionsConfiguration): void {
+  const passIfSubdomain = async (shouldPass: boolean, ctx: ParameterizedContext, next: () => Promise<any>, givenRouter: Router): Promise<any> => {
+    console.log('getting called')
+    console.log(shouldPass, ctx.origin, config.network.url.origin, (ctx.origin !== config.network.url.origin) === (shouldPass))
+    if ((ctx.origin !== config.network.url.origin) === (shouldPass)) {
+      await givenRouter.routes()(ctx as ParameterizedContext<any, IRouterParamContext<any, {}>>, async () => {
+        await givenRouter.allowedMethods()(ctx as ParameterizedContext<any, IRouterParamContext<any, {}>>, next)
+      })
+    } else {
+      await next()
+    }
+  }
 
-  const router = new Router()
-  // const subdomainRouter = getSubdomainRouter(config)
-  // const rootRouter = getRootRouter(config)
+  const subdomainRouter = getSubdomainRouter(config)
+  const rootRouter = getRootRouter(config)
 
-  router.use('/', async (ctx, next) => {
+  app.use(async (ctx, next) => {
     console.log('beep boop')
     await next()
   })
-  // router.use(async (ctx, next) => await passIfSubdomain(true, ctx, next, subdomainRouter))
-  // router.use(async (ctx, next) => await passIfSubdomain(false, ctx, next, rootRouter))
-
-  return router
+  app.use(async (ctx, next) => await passIfSubdomain(true, ctx, next, subdomainRouter))
+  app.use(async (ctx, next) => await passIfSubdomain(false, ctx, next, rootRouter))
 }
 

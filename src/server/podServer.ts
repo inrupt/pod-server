@@ -3,7 +3,7 @@ import Koa from 'koa'
 
 import { PodServerConfiguration, StorageAdapter, PodServerManditoryOptionsConfiguration } from "../types/configuration.types";
 import { applyPodServerConfigurationDefaults } from '../configurations/applyConfigurationDefaults';
-import getPodServerRouter from './router';
+import initializeRoutes from './router';
 
 const debug = Debug('pod-server')
 
@@ -21,9 +21,7 @@ export default class PodServer {
     this.app.proxy = true
     // TODO: change key strategy
     this.app.keys = [ 'CHANGE_THIS' ]
-    const router = getPodServerRouter(this.config)
-    this.app.use(router.routes())
-    this.app.use(router.allowedMethods())
+    initializeRoutes(this.app, this.config)
   }
 
   listen() {
