@@ -24,6 +24,7 @@
     "koa-static-server": "^1.4.0",
     "mashlib": "^1.0.0",
     "mz": "^2.7.0",
+    "oidc-provider": "jaxoncreed/node-oidc-provider-6-custom",
     "redis": "^2.8.0",
     "semver": "^6.3.0",
     "solid-idp": "0.1.5-build3",

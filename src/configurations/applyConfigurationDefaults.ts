@@ -66,11 +66,15 @@ function applyNetworkConfigurationDefaults(networkConfig?: NetworkConfiguration)
  */
 
 export function applyPodServerConfigurationDefaults(config: PodServerConfiguration, fileLocation: string): PodServerManditoryOptionsConfiguration {
+  // Apply server network to identity provider if unavailable
+  if (config.identityProvider && !config.identityProvider.network) {
+    config.identityProvider.network = config.network
+  }
   return {
     storage: applyStorageAdapterDefaults(config.storage),
     network: applyNetworkConfigurationDefaults(config.network),
     htmlRenderer: applyHTMLRendererDefaults(config.htmlRenderer),
-    identityProvider: applyIdentityProviderConfigurationDefaults(config.identityProvider)
+    identityProvider: applyIdent(config.identityProvider)
   }
 }
 
@@ -81,6 +85,7 @@ export function applyIdentityProviderConfigurationDefaults(config?: IdentityProv
   return {
     enabled: config.enabled == false ? false : true,
     storage: applyStorageAdapterDefaults(config.storage),
+    network: applyNetworkConfigurationDefaults(config.network),
     keystore: config.keystore
   }
 }

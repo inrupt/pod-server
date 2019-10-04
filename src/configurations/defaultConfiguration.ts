@@ -1,4 +1,6 @@
-const defaultConfiguration = {
+import { PodServerConfiguration } from "../types/configuration.types";
+
+const defaultConfiguration: PodServerConfiguration = {
   storage: {
     type: 'filesystem',
     options: {
@@ -15,14 +17,17 @@ const defaultConfiguration = {
     type: 'mashlib'
   },
   identityProvider: {
-    enabled: true,
-    storage: {
-      type: 'filesystem',
-      options: {
-        rootFolder: './db'
-      }
-    },
-    keystore: "./sample-keystore.json"
+    type: 'ipsDefaultIDP',
+    options: {
+      storage: {
+        type: 'filesystem',
+        options: {
+          rootFolder: './db'
+        }
+      },
+      keystore: "./sample-keystore.json",
+      issuer: 'http://localhost:8080'
+    }
   }
 }
 

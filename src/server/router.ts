@@ -4,6 +4,10 @@ import Koa, { Context, ParameterizedContext } from 'koa';
 
 // TODO: this whole file will be changed once routing configuration is enabled. But for now, we hard code the subdomain routing strategy
 
+/**
+ * Returns the router that will be served on the subdomain (eg. jackson.solid.community)
+ * @param config: server config 
+ */
 function getSubdomainRouter(config: PodServerManditoryOptionsConfiguration): Router {
   const router = new Router()
   router.get('/', (ctx) => {
@@ -13,6 +17,10 @@ function getSubdomainRouter(config: PodServerManditoryOptionsConfiguration): Rou
   return router
 }
 
+/**
+ * Returns the router that will be served on the root domain (eg. solid.community)
+ * @param config: server config 
+ */
 function getRootRouter(config: PodServerManditoryOptionsConfiguration): Router {
   const router = new Router()
   router.get('/', (ctx) => {
@@ -38,10 +46,6 @@ export default function initailizeRoutes(app: Koa, config: PodServerManditoryOpt
   const subdomainRouter = getSubdomainRouter(config)
   const rootRouter = getRootRouter(config)
 
-  app.use(async (ctx, next) => {
-    console.log('beep boop')
-    await next()
-  })
   app.use(async (ctx, next) => await passIfSubdomain(true, ctx, next, subdomainRouter))
   app.use(async (ctx, next) => await passIfSubdomain(false, ctx, next, rootRouter))
 }

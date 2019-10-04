@@ -1,4 +1,5 @@
 import { Context } from "koa";
+import Router from 'koa-router'
 
 /**
  * ##############################################################
@@ -74,11 +75,19 @@ export type HTMLRenderer = (ctx: Context, graph: string) => string
 export interface IdentityProviderConfiguration {
   enabled?: boolean
   storage?: StorageConfiguration | StorageAdapter
+  network?: NetworkConfiguration
   keystore: string
 }
 
 export interface IdentityProviderManditoryOptionsConfiguration extends IdentityProviderConfiguration {
   enabled: boolean
   storage: StorageAdapter
+  network: NetworkManditoryOptionsConfiguration
   keystore: string
+}
+
+export abstract class IdentityProvider {
+  abstract getRouter(): Router
+  abstract setOnNewUser(handler: (username: string) => Promise<string>): void
+  abstract setUsernameToWebIDConverter(converter: (username: string) => Promise<string>)
 }
