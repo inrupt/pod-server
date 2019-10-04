@@ -14,8 +14,6 @@ import applyAdditionalRoutesDefaults from './additionalRoutes/applyAdditionalRou
  * Schemas
  */
 
-
-
 export const newtworkConfigurationSchema = {
   title: 'Network Configuration',
   type: 'object',

@@ -76,3 +76,6 @@ data
 
 .db
 data
+config.json
+config.idp.json
+keystore.json
