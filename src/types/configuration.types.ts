@@ -1,23 +1,24 @@
-import { Context } from "koa";
-import Router from 'koa-router'
+import { Router, Request, Response } from 'express'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
 
-/**
+/*
  * ##############################################################
- * Configurations
+ * Pod-Server Configurations
  * ##############################################################
  */
 export interface PodServerConfiguration {
   storage?: StorageConfiguration | StorageAdapter
   network?: NetworkConfiguration
   htmlRenderer?: HTMLRendererConfiguration | HTMLRenderer,
-  identityProvider?: IdentityProviderConfiguration 
+  additionalRoutes?: AdditionalRoutesConfiguration | Router
 }
 
 export interface PodServerManditoryOptionsConfiguration extends PodServerConfiguration {
   storage: StorageAdapter
   network: NetworkManditoryOptionsConfiguration
   htmlRenderer: HTMLRenderer
-  identityProvider: IdentityProviderConfiguration 
+  additionalRoutes: Router
+  relativeConfigFilepath: string
 }
 
 export interface NetworkConfiguration {
@@ -41,7 +42,7 @@ export interface NetworkManditoryOptionsConfiguration extends NetworkConfigurati
   }
 }
 
-/**
+/*
  * Storage Configuration
  */
 export interface StorageConfiguration {
@@ -57,7 +58,7 @@ export interface StorageAdapter {
   delete(key: string): Promise<void>
 }
 
-/**
+/*
  * HTML Renderer Configuration
  */
 export interface HTMLRendererConfiguration {
@@ -67,27 +68,37 @@ export interface HTMLRendererConfiguration {
   } 
 }
 
-export type HTMLRenderer = (ctx: Context, graph: string) => string
+export type HTMLRenderer = (req: Request, res: Response, graph: string) => void
 
-/**
+/*
  * Identity Provider Configuration
  */
-export interface IdentityProviderConfiguration {
-  enabled?: boolean
-  storage?: StorageConfiguration | StorageAdapter
-  network?: NetworkConfiguration
-  keystore: string
+export interface AdditionalRoutesConfiguration {
+  type: string,
+  options?: {
+    [key: string]: any
+  }
 }
 
-export interface IdentityProviderManditoryOptionsConfiguration extends IdentityProviderConfiguration {
-  enabled: boolean
+/*
+ * ##############################################################
+ * IPS IDP Configurations
+ * ##############################################################
+ */
+export interface JWKS {
+  keys: ({ [keys: string]: any })[]
+}
+
+export interface IPSIDPConfiguration {
+  keystore: string | JWKS
+  issuer?: string
+  mailConfiguration?: SMTPTransport.Options,
+  storage: StorageConfiguration | StorageAdapter
+}
+
+export interface IPSIDPInternalConfiguration extends IPSIDPConfiguration {
+  keystore: JWKS
+  issuer: string
+  mailConfiguration?: SMTPTransport.Options
   storage: StorageAdapter
-  network: NetworkManditoryOptionsConfiguration
-  keystore: string
-}
-
-export abstract class IdentityProvider {
-  abstract getRouter(): Router
-  abstract setOnNewUser(handler: (username: string) => Promise<string>): void
-  abstract setUsernameToWebIDConverter(converter: (username: string) => Promise<string>)
 }

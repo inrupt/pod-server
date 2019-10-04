@@ -1,4 +1,4 @@
-import { StorageAdapter } from "../../types/configuration.types";
+import { StorageAdapter } from "../../../types/configuration.types";
 
 const map: { [key: string]: string } = {}
 

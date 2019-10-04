@@ -1,5 +1,5 @@
-import { StorageConfiguration, StorageAdapter } from "../../types/configuration.types";
-import validateSchema from "../../util/validateSchema";
+import { StorageConfiguration, StorageAdapter } from "../../../types/configuration.types";
+import validateSchema from "../../../util/validateSchema";
 
 import getFilesystemStorageAdapter from "./filesystem.storageAdapter";
 import getInMemoryStorageAdapter from "./inMemory.storageAdapter";
@@ -27,7 +27,7 @@ const storageConfigurationSchema = {
   }
 }
 
-export function applyStorageAdapterDefaults(storageConfig?: StorageConfiguration | StorageAdapter): StorageAdapter {
+export default function applyStorageAdapterDefaults(storageConfig?: StorageConfiguration | StorageAdapter): StorageAdapter {
   if (!storageConfig) {
     return getInMemoryStorageAdapter()
   }

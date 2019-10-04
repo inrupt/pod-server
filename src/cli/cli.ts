@@ -5,8 +5,8 @@ import fs from 'mz/fs'
 import path from 'path'
 import assert from 'assert'
 import { PodServerConfiguration } from '../types/configuration.types';
-import defaultConfiguration from '../configurations/defaultConfiguration';
-import PodServer from '../server/podServer';
+import defaultConfiguration from '../podServer/podServerConfigurations/defaultConfiguration';
+import PodServer from '../podServer/podServer';
 
 /**
  * pod-server init
@@ -29,12 +29,28 @@ program.command('init [destination]')
  * pod-server start
  */
 program.command('start [configDestination]')
-  .description('Initialize a configuration for the solid server')
+  .description('Start the solid server.')
   .action(async (configDestination: string = './config.json') => {
     try {
       const configPath = path.join(process.cwd(), configDestination)
       const config: PodServerConfiguration = JSON.parse((await fs.readFile(configPath)).toString())
-      const server = new PodServer(config)
+      const server = new PodServer(config, configPath)
+      server.listen()
+    } catch(err) {
+      console.error(err.message)
+    }
+  })
+
+/**
+ * idp start
+ */
+program.command('idp [configDestination]')
+  .description('Start just the identity provider.')
+  .action(async (configDestination: string) => {
+    try {
+      const configPath = path.join(process.cwd(), configDestination)
+      const config: PodServerConfiguration = JSON.parse((await fs.readFile(configPath)).toString())
+      const server = new PodServer(config, configPath)
       server.listen()
     } catch(err) {
       console.error(err.message)

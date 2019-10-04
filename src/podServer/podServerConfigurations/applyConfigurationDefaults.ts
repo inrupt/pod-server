@@ -1,15 +1,14 @@
 import {
   PodServerConfiguration,
   PodServerManditoryOptionsConfiguration,
-  IdentityProviderConfiguration,
-  IdentityProviderManditoryOptionsConfiguration,
   NetworkConfiguration,
   NetworkManditoryOptionsConfiguration
-} from "../types/configuration.types";
-import validateSchema from "../util/validateSchema";
+} from "../../types/configuration.types";
+import validateSchema from "../../util/validateSchema";
 import defaultConfiguration from "./defaultConfiguration";
-import { applyStorageAdapterDefaults } from "./storageAdapters/applyStorageAdapterDefaults";
+import applyStorageAdapterDefaults from "./storageAdapters/applyStorageAdapterDefaults";
 import applyHTMLRendererDefaults from "./htmlRenderers/applyHTMLRendererDefaults";
+import applyAdditionalRoutesDefaults from './additionalRoutes/applyAdditionalRoutesDefaults'
 
 /*
  * Schemas
@@ -66,26 +65,11 @@ function applyNetworkConfigurationDefaults(networkConfig?: NetworkConfiguration)
  */
 
 export function applyPodServerConfigurationDefaults(config: PodServerConfiguration, fileLocation: string): PodServerManditoryOptionsConfiguration {
-  // Apply server network to identity provider if unavailable
-  if (config.identityProvider && !config.identityProvider.network) {
-    config.identityProvider.network = config.network
-  }
   return {
     storage: applyStorageAdapterDefaults(config.storage),
     network: applyNetworkConfigurationDefaults(config.network),
     htmlRenderer: applyHTMLRendererDefaults(config.htmlRenderer),
-    identityProvider: applyIdent(config.identityProvider)
-  }
-}
-
-export function applyIdentityProviderConfigurationDefaults(config?: IdentityProviderConfiguration): IdentityProviderManditoryOptionsConfiguration {
-  if (!config) {
-    return applyIdentityProviderConfigurationDefaults(defaultConfiguration.identityProvider)
-  }
-  return {
-    enabled: config.enabled == false ? false : true,
-    storage: applyStorageAdapterDefaults(config.storage),
-    network: applyNetworkConfigurationDefaults(config.network),
-    keystore: config.keystore
+    additionalRoutes: applyAdditionalRoutesDefaults(config.additionalRoutes),
+    relativeConfigFilepath: fileLocation
   }
 }

@@ -1,4 +1,4 @@
-import { StorageAdapter } from "../../types/configuration.types";
+import { StorageAdapter } from "../../../types/configuration.types";
 
 export default function getFilesystemStorageAdapter(options: {}): StorageAdapter {
   // TODO Complete

@@ -1,6 +1,6 @@
-import { PodServerConfiguration } from "../types/configuration.types";
+import { PodServerConfiguration } from "../../types/configuration.types";
 
-const defaultConfiguration: PodServerConfiguration = {
+const defaultConfiguration = {
   storage: {
     type: 'filesystem',
     options: {
@@ -16,8 +16,8 @@ const defaultConfiguration: PodServerConfiguration = {
   htmlRenderer: {
     type: 'mashlib'
   },
-  identityProvider: {
-    type: 'ipsDefaultIDP',
+  additionalRoutes: {
+    type: 'ipsIDP',
     options: {
       storage: {
         type: 'filesystem',

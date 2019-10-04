@@ -1,6 +1,6 @@
-import { HTMLRendererConfiguration, HTMLRenderer } from "../../types/configuration.types";
+import { HTMLRendererConfiguration, HTMLRenderer } from "../../../types/configuration.types";
 import defaultConfiguration from "../defaultConfiguration";
-import validateSchema from "../../util/validateSchema";
+import validateSchema from "../../../util/validateSchema";
 import getMashlibHTMLRenderer from "./mashlib.htmlRenderer";
 
 const htmlRendererConfigurationMap: { [key: string]: (options?: any) => HTMLRenderer } = {
