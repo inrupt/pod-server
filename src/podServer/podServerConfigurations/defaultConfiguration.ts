@@ -25,7 +25,7 @@ const defaultConfiguration = {
           rootFolder: './db'
         }
       },
-      keystore: "./sample-keystore.json",
+      keystore: "./keystore.json",
       issuer: 'http://localhost:8080'
     }
   }

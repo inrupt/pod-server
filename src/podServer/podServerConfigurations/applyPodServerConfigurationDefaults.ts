@@ -1,8 +1,8 @@
 import {
   PodServerConfiguration,
-  PodServerManditoryOptionsConfiguration,
+  PodServerInternalConfiguration,
   NetworkConfiguration,
-  NetworkManditoryOptionsConfiguration
+  NetworkInternalConfiguration
 } from "../../types/configuration.types";
 import validateSchema from "../../util/validateSchema";
 import defaultConfiguration from "./defaultConfiguration";
@@ -47,7 +47,7 @@ export const newtworkConfigurationSchema = {
  * Retrieve based on configs
  */
 
-function applyNetworkConfigurationDefaults(networkConfig?: NetworkConfiguration): NetworkManditoryOptionsConfiguration {
+export function applyNetworkConfigurationDefaults(networkConfig?: NetworkConfiguration): NetworkInternalConfiguration {
   if (!networkConfig) {
     return applyNetworkConfigurationDefaults(defaultConfiguration.network)
   }
@@ -55,14 +55,14 @@ function applyNetworkConfigurationDefaults(networkConfig?: NetworkConfiguration)
   return {
     ...networkConfig,
     url: new URL(`${networkConfig.protocol}://${networkConfig.hostname}:${networkConfig.port}`)
-  } as NetworkManditoryOptionsConfiguration
+  } as NetworkInternalConfiguration
 }
 
 /*
  * Apply Configuration Defaults
  */
 
-export function applyPodServerConfigurationDefaults(config: PodServerConfiguration, fileLocation: string): PodServerManditoryOptionsConfiguration {
+export default function applyPodServerConfigurationDefaults(config: PodServerConfiguration, fileLocation: string): PodServerInternalConfiguration {
   return {
     storage: applyStorageAdapterDefaults(config.storage),
     network: applyNetworkConfigurationDefaults(config.network),

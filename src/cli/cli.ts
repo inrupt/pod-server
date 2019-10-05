@@ -8,6 +8,7 @@ import { JWKS } from '@panva/jose'
 import { PodServerConfiguration, IPSIDPConfiguration } from '../types/configuration.types';
 import defaultConfiguration from '../podServer/podServerConfigurations/defaultConfiguration';
 import PodServer from '../podServer/podServer';
+import IPSIDP from '../identityProvider/ipsIDP/ipsIDP';
 
 /**
  * pod-server init
@@ -34,7 +35,14 @@ program.command('init-idp [destination]')
   .description('Initialize a configuration for the solid server')
   .action(async (destination: string = './config.idp.json') => {
     // TODO: Make this customizable
-    await initializeConfig(destination, defaultConfiguration.additionalRoutes.options)
+    await initializeConfig(destination, {
+      ...defaultConfiguration.additionalRoutes.options,
+      network: {
+        hostname: 'localhost',
+        port: 8081,
+        protocol: 'http'
+      }
+    })
   })
 
 program.command('init-keystore [destination]')
@@ -73,8 +81,8 @@ program.command('idp [configDestination]')
     try {
       const configPath = path.join(process.cwd(), configDestination)
       const config: IPSIDPConfiguration = JSON.parse((await fs.readFile(configPath)).toString())
-      // const server = new IPSIDP(config, configPath)
-      // server.listen()
+      const server = new IPSIDP(config, configPath)
+      server.listen()
     } catch(err) {
       console.error(err.message)
     }

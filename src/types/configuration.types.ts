@@ -13,9 +13,9 @@ export interface PodServerConfiguration {
   additionalRoutes?: AdditionalRoutesConfiguration | Router
 }
 
-export interface PodServerManditoryOptionsConfiguration extends PodServerConfiguration {
+export interface PodServerInternalConfiguration extends PodServerConfiguration {
   storage: StorageAdapter
-  network: NetworkManditoryOptionsConfiguration
+  network: NetworkInternalConfiguration
   htmlRenderer: HTMLRenderer
   additionalRoutes: Router
   relativeConfigFilepath: string
@@ -31,7 +31,7 @@ export interface NetworkConfiguration {
   }
 }
 
-export interface NetworkManditoryOptionsConfiguration extends NetworkConfiguration {
+export interface NetworkInternalConfiguration extends NetworkConfiguration {
   url: URL
   hostname: string
   port: number
@@ -93,7 +93,8 @@ export interface IPSIDPConfiguration {
   keystore: string | JWKS
   issuer?: string
   mailConfiguration?: SMTPTransport.Options,
-  storage: StorageConfiguration | StorageAdapter
+  storage: StorageConfiguration | StorageAdapter,
+  network?: NetworkConfiguration
 }
 
 export interface IPSIDPInternalConfiguration extends IPSIDPConfiguration {
@@ -101,4 +102,5 @@ export interface IPSIDPInternalConfiguration extends IPSIDPConfiguration {
   issuer: string
   mailConfiguration?: SMTPTransport.Options
   storage: StorageAdapter
+  network?: NetworkInternalConfiguration
 }

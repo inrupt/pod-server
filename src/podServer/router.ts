@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { PodServerManditoryOptionsConfiguration } from '../types/configuration.types';
+import { PodServerInternalConfiguration } from '../types/configuration.types';
 
 
 // TODO: this whole file will be changed once routing configuration is enabled. But for now, we hard code the subdomain routing strategy
@@ -30,7 +30,7 @@ import { PodServerManditoryOptionsConfiguration } from '../types/configuration.t
 //   return router
 // }
 
-export default function routerFactory(config: PodServerManditoryOptionsConfiguration): Router {
+export default function routerFactory(config: PodServerInternalConfiguration): Router {
   // const passIfSubdomain = async (shouldPass: boolean, ctx: ParameterizedContext, next: () => Promise<any>, givenRouter: Router): Promise<any> => {
   //   console.log('getting called')
   //   console.log(shouldPass, ctx.origin, config.network.url.origin, (ctx.origin !== config.network.url.origin) === (shouldPass))
