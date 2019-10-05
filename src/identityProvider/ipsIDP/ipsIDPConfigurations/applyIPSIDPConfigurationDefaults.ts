@@ -13,7 +13,7 @@ export function applyKeystoreConfigurationDefaults(keystoreConfig: string | JWKS
   if (potentialKeystore.keys && Array.isArray(potentialKeystore.keys)) {
     return potentialKeystore
   }
-  const keystorePath = path.join(configFileLocation, keystoreConfig as string)
+  const keystorePath = path.join(configFileLocation, '../', keystoreConfig as string)
   return JSON.parse((fs.readFileSync(keystorePath)).toString()) as JWKS
 }
 
