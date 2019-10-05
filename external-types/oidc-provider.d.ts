@@ -187,6 +187,7 @@ declare module 'oidc-provider' {
           ack?: number
           iatTolerance?: number
         }
+        dangerouslyEnableLocalhost?: boolean
         devInteractions?: FeatureConfiguration
         deviceFlow?: {
           charset?: 'base-20' | 'digits'

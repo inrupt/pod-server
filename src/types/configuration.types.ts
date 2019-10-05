@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import { JWKSet } from 'oidc-provider';
 
 /*
  * ##############################################################
@@ -85,12 +86,9 @@ export interface AdditionalRoutesConfiguration {
  * IPS IDP Configurations
  * ##############################################################
  */
-export interface JWKS {
-  keys: ({ [keys: string]: any })[]
-}
 
 export interface IPSIDPConfiguration {
-  keystore: string | JWKS
+  keystore: string | JWKSet
   issuer?: string
   mailConfiguration?: SMTPTransport.Options,
   storage: StorageConfiguration | StorageAdapter,
@@ -98,7 +96,7 @@ export interface IPSIDPConfiguration {
 }
 
 export interface IPSIDPInternalConfiguration extends IPSIDPConfiguration {
-  keystore: JWKS
+  keystore: JWKSet
   issuer: string
   mailConfiguration?: SMTPTransport.Options
   storage: StorageAdapter
