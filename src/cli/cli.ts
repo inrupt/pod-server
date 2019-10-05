@@ -19,6 +19,7 @@ async function initializeConfig(destination: string, config: any) {
     assert(!await fs.exists(filePath), `${filePath} already exists.`)
 
     await fs.writeFile(path.join(process.cwd(), destination), JSON.stringify(config, null, 2))
+    console.log(`Initialized at ${filePath}`)
   } catch (err) {
     console.error(err.message)
   }
