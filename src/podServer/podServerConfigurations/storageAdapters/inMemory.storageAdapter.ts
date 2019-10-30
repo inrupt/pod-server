@@ -3,7 +3,7 @@ import { StorageAdapter } from "../../../types/configuration.types";
 const map: { [key: string]: string } = {}
 
 export default function getInMemoryStorageAdapter(options?: {}): StorageAdapter {
-  // TODO Complete
+  // TODO Complete - Jackson
   return {
     async get(key: string) {
       return map[key]

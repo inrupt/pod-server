@@ -6,6 +6,7 @@
   "bin": "dist/cli/cli.js",
   "dependencies": {
     "@panva/jose": "^1.9.2",
+    "@types/cors": "^2.8.6",
     "@types/debug": "^4.1.4",
     "@types/express": "^4.17.1",
     "@types/mz": "0.0.32",
@@ -16,6 +17,7 @@
     "ajv": "^6.10.2",
     "buffer-to-stream": "^1.0.0",
     "commander": "^3.0.2",
+    "cors": "^2.8.5",
     "debug": "^4.1.1",
     "express": "^4.17.1",
     "mashlib": "^1.0.0",

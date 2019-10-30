@@ -1,7 +1,7 @@
 import { StorageAdapter } from "../../../types/configuration.types";
 
 export default function getRedisStorageAdapter(options: {}): StorageAdapter {
-  // TODO Complete
+  // TODO Complete - Jackson
   return {
     async get(key: string) {
       return ''

@@ -2,7 +2,7 @@ import Debug from 'debug'
 import express, { Router } from 'express'
 import { PodServerConfiguration, StorageAdapter, PodServerInternalConfiguration } from "../types/configuration.types";
 import applyPodServerConfigurationDefaults from './podServerConfigurations/applyPodServerConfigurationDefaults';
-import routerFactory from './router';
+import routerFactory from './RouterFactory';
 
 const debug = Debug('pod-server')
 

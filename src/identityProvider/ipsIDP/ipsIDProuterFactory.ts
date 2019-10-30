@@ -4,7 +4,7 @@ import SolidIdp from "../solidIdentityProvider";
 
 export default function ipsIDPRouterFactory(config: IPSIDPInternalConfiguration): Router {
   const oidc = new SolidIdp(config.issuer, {
-    // TODO: refactor persistant storage
+    // TODO: refactor persistant storage - Jackson
     // adapter: config.storage.sessionAdapter,
     // findAccount: DefaultConfigAccount.findById,
     jwks: config.keystore,

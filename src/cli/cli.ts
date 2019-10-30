@@ -7,7 +7,7 @@ import assert from 'assert'
 import { JWKS } from '@panva/jose'
 import { PodServerConfiguration, IPSIDPConfiguration } from '../types/configuration.types';
 import defaultConfiguration from '../podServer/podServerConfigurations/defaultConfiguration';
-import PodServer from '../podServer/podServer';
+import PodServer from '../podServer/PodServer';
 import IPSIDP from '../identityProvider/ipsIDP/ipsIDP';
 
 /**
@@ -28,14 +28,14 @@ async function initializeConfig(destination: string, config: any) {
 program.command('init [destination]')
   .description('Initialize a configuration for the solid server')
   .action(async (destination: string = './config.json') => {
-    // TODO: Make this customizable
+    // TODO: Make this customizable - Jackson
     await initializeConfig(destination, defaultConfiguration)
   })
 
 program.command('init-idp [destination]')
   .description('Initialize a configuration for the solid server')
   .action(async (destination: string = './config.idp.json') => {
-    // TODO: Make this customizable
+    // TODO: Make this customizable - Jackson
     await initializeConfig(destination, {
       ...defaultConfiguration.additionalRoutes.options,
       network: {
