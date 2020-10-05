@@ -15,7 +15,7 @@
     "@types/ws": "^6.0.1",
     "buffer-to-stream": "^1.0.0",
     "debug": "^4.1.1",
-    "koa": "^2.7.0",
+    "koa": "^2.13.0",
     "koa-session": "^5.12.2",
     "koa-static-server": "^1.4.0",
     "mashlib": "^1.0.0",
