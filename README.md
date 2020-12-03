@@ -1,3 +1,9 @@
+-----
+
+**⚠️ This project is obsolete. Please use the [Community Solid Server](https://github.com/solid/community-server) instead. ⚠️**
+
+-----
+
 # pod-server
 
 [![Build Status](https://travis-ci.org/inrupt/pod-server.svg?branch=master)](https://travis-ci.org/inrupt/pod-server)
