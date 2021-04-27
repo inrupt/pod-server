@@ -19,7 +19,7 @@
     "koa-session": "^5.12.2",
     "koa-static-server": "^1.4.0",
     "mashlib": "^1.0.0",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "semver": "^6.3.0",
     "solid-idp": "0.1.5-build3",
     "solid-server-ts": "^0.1.1",
