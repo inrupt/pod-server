@@ -1,3 +1,6 @@
+# ⛔ Deprecated
+This repository is no longer maintained by Inrupt. Of course you can clone the repository if you wish to work in the code yourself. 
+There are maintained open source Solid servers such as [CSS](https://github.com/solid/community-server) which are still supported. 
 # pod-server
 
 [![Build Status](https://travis-ci.org/inrupt/pod-server.svg?branch=master)](https://travis-ci.org/inrupt/pod-server)
