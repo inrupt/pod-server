@@ -21,7 +21,7 @@
     "mashlib": "^1.0.0",
     "redis": "^2.8.0",
     "semver": "^6.3.0",
-    "solid-idp": "0.1.5-build3",
+    "solid-idp": "0.1.5",
     "solid-server-ts": "^0.1.1",
     "wac-ldp": "^0.9.5",
     "websockets-pubsub": "^0.3.7",
